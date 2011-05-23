@@ -246,7 +246,7 @@ void ExteriorCellRender::insertActorPhysics()
 void ExteriorCellRender::insertLight(float r, float g, float b, float radius)
 {
   assert (mInsert);
-
+  std::cout << "insert light";
   Ogre::Light *light = mScene.getMgr()->createLight();
   light->setDiffuseColour (r, g, b);
 
@@ -377,8 +377,9 @@ void ExteriorCellRender::destroyAllAttachedMovableObjects(Ogre::SceneNode* i_pSc
 
    while ( itObject.hasMoreElements() )
    {
-      MovableObject* pObject = static_cast<MovableObject*>(itObject.getNext());
+      MovableObject* pObject = dynamic_cast<MovableObject*>(itObject.getNext());
       i_pSceneNode->getCreator()->destroyMovableObject( pObject );
+
    }
 
    // Recurse to child SceneNodes
