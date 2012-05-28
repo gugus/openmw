@@ -4,6 +4,7 @@
 #include "../mwworld/ptr.hpp"
 
 #include <openengine/ogre/renderer.hpp>
+#include <Ogre.h>
 
 namespace MWRender
 {

@@ -3,8 +3,6 @@
 
 #include <string>
 
-#include <Ogre.h>
-
 #include <components/esm/defs.hpp>
 
 #include "../mwscript/locals.hpp"
@@ -13,6 +11,11 @@ namespace ESM
 {
     class Script;
     class CellRef;
+}
+
+namespace Ogre
+{
+    class SceneNode;
 }
 
 namespace MWWorld

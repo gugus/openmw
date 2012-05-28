@@ -8,6 +8,15 @@
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
 
+#include <OGRE\OgreColourValue.h>
+#include <OGRE\OgreAxisAlignedBox.h>
+
+namespace Ogre
+{
+    class SceneNode;
+    class StaticGeometry;
+}
+
 namespace MWRender{
 
 /// information about light needed for rendering

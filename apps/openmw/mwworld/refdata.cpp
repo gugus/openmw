@@ -4,6 +4,7 @@
 #include <components/esm_store/cell_store.hpp>
 
 #include "customdata.hpp"
+#include "Ogre.h"
 
 namespace MWWorld
 {

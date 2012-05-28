@@ -1,7 +1,6 @@
 #ifndef MWGUI_MESSAGE_BOX_H
 #define MWGUI_MESSAGE_BOX_H
 
-#include <openengine/gui/layout.hpp>
 #include <MyGUI.h>
 
 #include "window_base.hpp"
