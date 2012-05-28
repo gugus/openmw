@@ -8,8 +8,8 @@
 #include "../mwworld/refdata.hpp"
 #include "../mwworld/ptr.hpp"
 
-#include <OGRE\OgreColourValue.h>
-#include <OGRE\OgreAxisAlignedBox.h>
+#include <OgreColourValue.h>
+#include <OgreAxisAlignedBox.h>
 
 namespace Ogre
 {
