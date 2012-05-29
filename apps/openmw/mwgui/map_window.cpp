@@ -2,6 +2,7 @@
 #include "window_manager.hpp"
 
 #include <boost/lexical_cast.hpp>
+#include <cmath>
 
 using namespace MWGui;
 
