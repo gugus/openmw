@@ -582,6 +582,27 @@ namespace MWWorld
                 }
             }
         }
+        else
+        {
+            Ptr::CellStore *currentCell = ptr.getCell();
+            if(currentCell)
+            {
+                if (!(currentCell->cell->data.flags & ESM::Cell::Interior))
+                {
+                    // exterior -> adjust loaded cells
+                    int cellX = 0;
+                    int cellY = 0;
+                    
+                    positionToIndex (x, y, cellX, cellY);
+                    if (currentCell->cell->data.gridX!=cellX || currentCell->cell->data.gridY!=cellY)
+                    {
+                        Ptr::CellStore *newCell = getExterior(cellX,cellY);
+                        mWorldScene->insertObject(ptr,newCell);
+                        deleteObject(ptr);
+                    }
+                }
+            }
+        }
 
         /// \todo cell change for non-player ref
 
