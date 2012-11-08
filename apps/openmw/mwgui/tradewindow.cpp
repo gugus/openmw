@@ -226,7 +226,7 @@ namespace MWGui
         }
 
 
-/// \todo adjust npc temporary disposition by iBarterSuccessDisposition or iBarterFailDisposition
+        /// \todo adjust npc temporary disposition by iBarterSuccessDisposition or iBarterFailDisposition
 
         // success! make the item transfer.
         transferBoughtItems();
