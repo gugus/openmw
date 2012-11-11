@@ -52,7 +52,6 @@ bool Animation::findGroupTimes(const std::string &groupname, Animation::GroupTim
         if(times->mStart >= 0.0f && times->mLoopStart >= 0.0f && times->mLoopStop >= 0.0f && times->mStop >= 0.0f)
             return true;
 
-        std::cout << iter->second << std::endl;
         std::string::const_iterator strpos = iter->second.begin();
         std::string::const_iterator strend = iter->second.end();
         size_t strlen = strend-strpos;
