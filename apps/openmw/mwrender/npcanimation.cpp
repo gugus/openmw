@@ -62,7 +62,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     mPants(mInv.end()),
     mGloveL(mInv.end()),
     mGloveR(mInv.end()),
-    mSkirtIter(mInv.end())
+    mSkirtIter(mInv.end()),
+    mWeapon(mInv.end())
 {
     mNpc = ptr.get<ESM::NPC>()->mBase;
 
@@ -157,6 +158,7 @@ void NpcAnimation::updateParts()
         { &mGloveR, MWWorld::InventoryStore::Slot_RightGauntlet },
         { &mShirt, MWWorld::InventoryStore::Slot_Shirt },
         { &mPants, MWWorld::InventoryStore::Slot_Pants },
+        { &mWeapon, MWWorld::InventoryStore::Slot_CarriedRight}
     };
     for(size_t i = 0;i < sizeof(slotlist)/sizeof(slotlist[0]);i++)
     {
@@ -293,6 +295,13 @@ void NpcAnimation::updateParts()
             const ESM::Clothing *clothes = (mPants->get<ESM::Clothing>())->mBase;
             std::vector<ESM::PartReference> parts = clothes->mParts.mParts;
             addPartGroup(MWWorld::InventoryStore::Slot_Pants, 2, parts);
+        }
+        if(mWeapon != mInv.end())
+        {
+            const ESM::Weapon* weapon = (mWeapon->get<ESM::Weapon>())->mBase;
+            addOrReplaceIndividualPart(ESM::PRT_Weapon,MWWorld::InventoryStore::Slot_CarriedRight,1,"meshes\\" + weapon->mModel);
+            //std::vector<ESM::PartReference> parts = weapon->mP
+            std::cout << "trying to equip weapon...\n";
         }
     }
 
@@ -452,6 +461,7 @@ void NpcAnimation::removeIndividualPart(int type)
         removeEntities(mClavicleL);
     else if(type == ESM::PRT_Weapon)                 //25
     {
+        std::cout << "REMOVING WEAPON" << std::endl;
     }
     else if(type == ESM::PRT_Tail)    //26
         removeEntities(mTail);
@@ -561,6 +571,8 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
             mClavicleL = insertBoundedPart(mesh, group, "Left Clavicle");
             break;
         case ESM::PRT_Weapon:                             //25
+            mHandR = insertBoundedPart(mesh,group, "Weapon Bone");
+            std::cout << "INSERTING WEAPON" << std::endl;
             break;
         case ESM::PRT_Tail:                              //26
             mTail = insertBoundedPart(mesh, group, "Tail");

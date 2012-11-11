@@ -69,6 +69,7 @@ private:
     MWWorld::ContainerStoreIterator mGloveL;
     MWWorld::ContainerStoreIterator mGloveR;
     MWWorld::ContainerStoreIterator mSkirtIter;
+    MWWorld::ContainerStoreIterator mWeapon;
 
     int mVisibilityFlags;
 
