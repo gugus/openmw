@@ -41,12 +41,18 @@ bool Animation::findGroupTimes(const std::string &groupname, Animation::GroupTim
     const std::string &stop = groupname+": stop";
     const std::string &stoploop = groupname+": loop stop";
 
+    const std::string &start2 = groupname+" start";
+    const std::string &startloop2 = groupname+" loop start";
+    const std::string &stop2 = groupname+" stop";
+    const std::string &stoploop2 = groupname+" loop stop";
+
     NifOgre::TextKeyMap::const_iterator iter;
     for(iter = mTextKeys.begin();iter != mTextKeys.end();iter++)
     {
         if(times->mStart >= 0.0f && times->mLoopStart >= 0.0f && times->mLoopStop >= 0.0f && times->mStop >= 0.0f)
             return true;
 
+        std::cout << iter->second << std::endl;
         std::string::const_iterator strpos = iter->second.begin();
         std::string::const_iterator strend = iter->second.end();
         size_t strlen = strend-strpos;
@@ -65,6 +71,27 @@ bool Animation::findGroupTimes(const std::string &groupname, Animation::GroupTim
             times->mLoopStop = iter->first;
         }
         else if(stop.size() <= strlen && std::mismatch(strpos, strend, stop.begin(), checklow()).first == strend)
+        {
+            times->mStop = iter->first;
+            if(times->mLoopStop < 0.0f)
+                times->mLoopStop = iter->first;
+            break;
+        }
+
+        if(start2.size() <= strlen && std::mismatch(strpos, strend, start2.begin(), checklow()).first == strend)
+        {
+            times->mStart = iter->first;
+            times->mLoopStart = iter->first;
+        }
+        else if(startloop2.size() <= strlen && std::mismatch(strpos, strend, startloop2.begin(), checklow()).first == strend)
+        {
+            times->mLoopStart = iter->first;
+        }
+        else if(stoploop2.size() <= strlen && std::mismatch(strpos, strend, stoploop2.begin(), checklow()).first == strend)
+        {
+            times->mLoopStop = iter->first;
+        }
+        else if(stop2.size() <= strlen && std::mismatch(strpos, strend, stop2.begin(), checklow()).first == strend)
         {
             times->mStop = iter->first;
             if(times->mLoopStop < 0.0f)
