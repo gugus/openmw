@@ -42,6 +42,7 @@ protected:
     NifOgre::TextKeyMap mTextKeys;
 
     bool findGroupTimes(const std::string &groupname, GroupTimes *times);
+    bool findCustomGroupNote(const std::string &groupname,const std::string &note,float time);
 
 public:
     Animation();

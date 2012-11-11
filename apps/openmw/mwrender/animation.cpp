@@ -103,6 +103,25 @@ bool Animation::findGroupTimes(const std::string &groupname, Animation::GroupTim
 }
 
 
+bool Animation::findCustomGroupNote(const std::string &groupname,const std::string &note,float time)
+{
+    time = -1;
+    NifOgre::TextKeyMap::const_iterator iter;
+    for(iter = mTextKeys.begin();iter != mTextKeys.end();iter++)
+    {
+        std::string::const_iterator strpos = iter->second.begin();
+        std::string::const_iterator strend = iter->second.end();
+        size_t strlen = strend-strpos;
+
+        if(note.size() <= strlen && std::mismatch(strpos, strend, note.begin(), checklow()).first == strend)
+        {
+            time = iter->first;
+            return true;
+        }
+    }
+    return false;
+}
+
 void Animation::playGroup(std::string groupname, int mode, int loops)
 {
     GroupTimes times;
