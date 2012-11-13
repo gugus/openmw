@@ -11,6 +11,35 @@
 namespace MWRender
 {
 
+void Animation::Group::readyAnimation(Ogre::Entity *ent, const std::string &groupname)
+{
+    mState = ent->getAnimationState(groupname);
+
+    Ogre::SkeletonInstance *skel = ent->getSkeleton();
+    Ogre::Animation *anim = skel->getAnimation(groupname);
+    /* FIXME: Not all skeletons have a Bip01 node, creatures for instance use a different name. We
+     * should probably be using the skeleton root bone, but the current Ogre NIF loader will create
+     * bones before the first animated bone. */
+    if(anim && skel->hasBone("Bip01"))
+    {
+        unsigned short handle = skel->getBone("Bip01")->getHandle();
+        if(anim->hasNodeTrack(handle))
+        {
+            Ogre::NodeAnimationTrack *track = anim->getNodeTrack(handle);
+            int numkfs = track->getNumKeyFrames();
+            if(numkfs > 1)
+            {
+                Ogre::TransformKeyFrame *startframe = track->getNodeKeyFrame(0);
+                Ogre::TransformKeyFrame *endframe = track->getNodeKeyFrame(numkfs-1);
+
+                mVelocity = (endframe->getTranslate() - startframe->getTranslate()) /
+                            (endframe->getTime() - startframe->getTime());
+            }
+        }
+    }
+}
+
+
 Animation::Animation()
     : mInsert(NULL)
     , mTime(0.0f)
@@ -20,10 +49,14 @@ Animation::Animation()
 
 Animation::~Animation()
 {
-    Ogre::SceneManager *sceneMgr = mInsert->getCreator();
-    for(size_t i = 0;i < mEntityList.mEntities.size();i++)
-        sceneMgr->destroyEntity(mEntityList.mEntities[i]);
+    if(mInsert)
+    {
+        Ogre::SceneManager *sceneMgr = mInsert->getCreator();
+        for(size_t i = 0;i < mEntityList.mEntities.size();i++)
+            sceneMgr->destroyEntity(mEntityList.mEntities[i]);
+    }
     mEntityList.mEntities.clear();
+    mEntityList.mSkelBase = 0;
 }
 
 
@@ -34,12 +67,39 @@ struct checklow {
     }
 };
 
-bool Animation::findGroupTimes(const std::string &groupname, Animation::GroupTimes *times)
+
+void Animation::createEntityList(Ogre::SceneNode *node, const std::string model)
 {
-    const std::string &start = groupname+": start";
-    const std::string &startloop = groupname+": loop start";
-    const std::string &stop = groupname+": stop";
-    const std::string &stoploop = groupname+": loop stop";
+    mInsert = node->createChildSceneNode();
+    assert(mInsert);
+
+    mEntityList = NifOgre::NIFLoader::createEntities(mInsert, &mTextKeys, model);
+    if(mEntityList.mSkelBase)
+    {
+        Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
+        Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
+        while(as.hasMoreElements())
+        {
+            Ogre::AnimationState *state = as.getNext();
+            state->setEnabled(false);
+            state->setLoop(false);
+        }
+    }
+}
+
+
+bool Animation::findGroupInfo(const std::string &groupname, const std::string &begin, const std::string &beginloop, const std::string &endloop, const std::string &end, Animation::Group *group)
+{
+    group->mBase = mTextKeys.end();
+    group->mStart = mTextKeys.end();
+    group->mLoopStart = mTextKeys.end();
+    group->mLoopStop = mTextKeys.end();
+    group->mStop = mTextKeys.end();
+
+    const std::string &start = groupname+": "+begin;
+    const std::string &startloop = groupname+": "+beginloop;
+    const std::string &stoploop = groupname+": "+endloop;
+    const std::string &stop = groupname+": "+end;
 
     const std::string &start2 = groupname+" start";
     const std::string &startloop2 = groupname+" loop start";
@@ -49,32 +109,41 @@ bool Animation::findGroupTimes(const std::string &groupname, Animation::GroupTim
     NifOgre::TextKeyMap::const_iterator iter;
     for(iter = mTextKeys.begin();iter != mTextKeys.end();iter++)
     {
-        if(times->mStart >= 0.0f && times->mLoopStart >= 0.0f && times->mLoopStop >= 0.0f && times->mStop >= 0.0f)
-            return true;
-
         std::string::const_iterator strpos = iter->second.begin();
         std::string::const_iterator strend = iter->second.end();
         size_t strlen = strend-strpos;
 
+        if(iter->second.find(':') != groupname.length() ||
+           std::mismatch(strpos, strend, groupname.begin(), checklow()).second != groupname.end())
+            continue;
+
+        if(group->mBase == mTextKeys.end())
+            group->mBase = iter;
+
         if(start.size() <= strlen && std::mismatch(strpos, strend, start.begin(), checklow()).first == strend)
         {
-            times->mStart = iter->first;
-            times->mLoopStart = iter->first;
-        }
-        else if(startloop.size() <= strlen && std::mismatch(strpos, strend, startloop.begin(), checklow()).first == strend)
-        {
-            times->mLoopStart = iter->first;
-        }
-        else if(stoploop.size() <= strlen && std::mismatch(strpos, strend, stoploop.begin(), checklow()).first == strend)
-        {
-            times->mLoopStop = iter->first;
+            group->mStart = iter;
+            group->mLoopStart = iter;
         }
         else if(stop.size() <= strlen && std::mismatch(strpos, strend, stop.begin(), checklow()).first == strend)
         {
-            times->mStop = iter->first;
-            if(times->mLoopStop < 0.0f)
-                times->mLoopStop = iter->first;
-            break;
+            group->mStop = iter;
+            if(group->mLoopStop == mTextKeys.end())
+                group->mLoopStop = iter;
+        }
+        if(startloop.size() <= strlen && std::mismatch(strpos, strend, startloop.begin(), checklow()).first == strend)
+        {
+            group->mLoopStart = iter;
+        }
+        else if(stoploop.size() <= strlen && std::mismatch(strpos, strend, stoploop.begin(), checklow()).first == strend)
+        {
+            group->mLoopStop = iter;
+        }
+        if(group->mStart != mTextKeys.end() && group->mLoopStart != mTextKeys.end() &&
+           group->mLoopStop != mTextKeys.end() && group->mStop != mTextKeys.end())
+        {
+            group->mNext = group->mStart;
+            return true;
         }
 
         if(start2.size() <= strlen && std::mismatch(strpos, strend, start2.begin(), checklow()).first == strend)
@@ -99,7 +168,45 @@ bool Animation::findGroupTimes(const std::string &groupname, Animation::GroupTim
         }
     }
 
-    return (times->mStart >= 0.0f && times->mLoopStart >= 0.0f && times->mLoopStop >= 0.0f && times->mStop >= 0.0f);
+    return false;
+}
+
+
+void Animation::processGroup(Group &group, float time)
+{
+    while(group.mNext != mTextKeys.end() && time >= group.mNext->first)
+    {
+        // TODO: Process group.mNext->second
+        group.mNext++;
+    }
+}
+
+
+void Animation::playAnim(const std::string &groupname, const std::string &begin, const std::string &end)
+{
+    loopAnim(groupname, begin, begin, end, end, 1);
+}
+
+void Animation::loopAnim(const std::string &groupname,
+                const std::string &begin, const std::string &beginloop,
+                const std::string &endloop, const std::string &end, int loops)
+{
+    if(!mEntityList.mSkelBase)
+        throw std::runtime_error("No skeleton on actor");
+
+    Group group;
+    group.mLoops = loops;
+    group.readyAnimation(mEntityList.mSkelBase, groupname);
+
+    if(!findGroupInfo(groupname, begin, beginloop, endloop, end, &group))
+        throw std::runtime_error("Failed to find info for animation group "+groupname);
+
+    if(mCurGroup.mState)
+        mCurGroup.mState->setEnabled(false);
+    mCurGroup = group;
+    mCurGroup.mState->setEnabled(true);
+    mNextGroup.mState = 0;
+    mTime = mCurGroup.mStart->first;
 }
 
 
@@ -124,28 +231,41 @@ bool Animation::findCustomGroupNote(const std::string &groupname,const std::stri
 
 void Animation::playGroup(std::string groupname, int mode, int loops)
 {
-    GroupTimes times;
-    times.mLoops = loops;
+    if(!mEntityList.mSkelBase)
+        throw std::runtime_error("No skeleton on actor");
+    std::transform(groupname.begin(), groupname.end(), groupname.begin(), ::tolower);
+
+    Group group;
+    group.mLoops = loops;
+    group.readyAnimation(mEntityList.mSkelBase, groupname);
 
     if(groupname == "all")
     {
-        times.mStart = times.mLoopStart = 0.0f;
-        times.mLoopStop = times.mStop = 0.0f;
+        group.mBase = group.mStart = group.mLoopStart = group.mLoopStop = group.mStop = mTextKeys.end();
 
-        NifOgre::TextKeyMap::const_reverse_iterator iter = mTextKeys.rbegin();
-        if(iter != mTextKeys.rend())
-            times.mLoopStop = times.mStop = iter->first;
+        NifOgre::TextKeyMap::const_iterator iter = mTextKeys.begin();
+        if(iter != mTextKeys.end())
+        {
+            group.mBase = group.mStart = group.mLoopStart = group.mNext = iter;
+            iter = mTextKeys.end();
+            group.mLoopStop = group.mStop = --iter;
+        }
     }
-    else if(!findGroupTimes(groupname, &times))
-        throw std::runtime_error("Failed to find animation group "+groupname);
+    else if(!findGroupInfo(groupname, "start", "loop start", "loop stop", "stop", &group))
+        throw std::runtime_error("Failed to find info for animation group "+groupname);
 
-    if(mode == 0 && mCurGroup.mLoops > 0)
-        mNextGroup = times;
+    if(mode == 0 && mCurGroup.mState)
+        mNextGroup = group;
     else
     {
-        mCurGroup = times;
-        mNextGroup = GroupTimes();
-        mTime = ((mode==2) ? mCurGroup.mLoopStart : mCurGroup.mStart);
+        if(mCurGroup.mState)
+            mCurGroup.mState->setEnabled(false);
+        mCurGroup = group;
+        mCurGroup.mState->setEnabled(true);
+        mNextGroup.mState = 0;
+        if(mode == 2)
+            mCurGroup.mNext = mCurGroup.mLoopStart;
+        mTime = mCurGroup.mNext->first;
     }
 }
 
@@ -156,37 +276,37 @@ void Animation::skipAnim()
 
 void Animation::runAnimation(float timepassed)
 {
-    if(mCurGroup.mLoops > 0 && !mSkipFrame)
+    if(mCurGroup.mState && !mSkipFrame)
     {
         mTime += timepassed;
-        if(mTime >= mCurGroup.mLoopStop)
+    do_more:
+        while(mCurGroup.mLoops > 1 && mTime >= mCurGroup.mLoopStop->first)
         {
-            if(mCurGroup.mLoops > 1)
-            {
-                mCurGroup.mLoops--;
-                mTime = mTime - mCurGroup.mLoopStop + mCurGroup.mLoopStart;
-            }
-            else if(mTime >= mCurGroup.mStop)
-            {
-                if(mNextGroup.mLoops > 0)
-                    mTime = mTime - mCurGroup.mStop + mNextGroup.mStart;
-                else
-                    mTime = mCurGroup.mStop;
-                mCurGroup = mNextGroup;
-                mNextGroup = GroupTimes();
-            }
-        }
+            processGroup(mCurGroup, mCurGroup.mLoopStop->first);
+            mCurGroup.mNext = mCurGroup.mLoopStart;
 
-        if(mEntityList.mSkelBase)
-        {
-            Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
-            Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
-            while(as.hasMoreElements())
-            {
-                Ogre::AnimationState *state = as.getNext();
-                state->setTimePosition(mTime);
-            }
+            mCurGroup.mLoops--;
+            mTime = mTime - mCurGroup.mLoopStop->first + mCurGroup.mLoopStart->first;
         }
+        if(mCurGroup.mLoops <= 1 && mTime >= mCurGroup.mStop->first)
+        {
+            processGroup(mCurGroup, mCurGroup.mStop->first);
+            if(mNextGroup.mState)
+            {
+                mTime = mTime - mCurGroup.mStop->first + mNextGroup.mStart->first;
+                mCurGroup.mState->setEnabled(false);
+                mCurGroup = mNextGroup;
+                mCurGroup.mState->setEnabled(true);
+                mNextGroup.mState = 0;
+                goto do_more;
+            }
+            mTime = mCurGroup.mStop->first;
+        }
+        else
+            processGroup(mCurGroup, mTime);
+
+        mCurGroup.mState->setTimePosition(mTime);
+        mInsert->setPosition(mCurGroup.mVelocity * -(mTime - mCurGroup.mBase->first));
     }
     mSkipFrame = false;
 }

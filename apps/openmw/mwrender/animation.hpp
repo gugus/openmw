@@ -15,38 +15,58 @@
 namespace MWRender {
 
 class Animation {
-    struct GroupTimes {
-        float mStart;
-        float mStop;
-        float mLoopStart;
-        float mLoopStop;
+    struct Group {
+        NifOgre::TextKeyMap::const_iterator mBase;
+
+        NifOgre::TextKeyMap::const_iterator mStart;
+        NifOgre::TextKeyMap::const_iterator mStop;
+        NifOgre::TextKeyMap::const_iterator mLoopStart;
+        NifOgre::TextKeyMap::const_iterator mLoopStop;
+
+        NifOgre::TextKeyMap::const_iterator mNext;
 
         size_t mLoops;
 
-        GroupTimes()
-          : mStart(-1.0f), mStop(-1.0f), mLoopStart(-1.0f), mLoopStop(-1.0f),
-            mLoops(0)
+        Ogre::AnimationState *mState;
+        Ogre::Vector3 mVelocity;
+
+        Group() : mLoops(0), mState(0), mVelocity(0.0f)
         { }
+
+        void readyAnimation(Ogre::Entity *ent, const std::string &groupname);
     };
+
+    void processGroup(Group &group, float time);
 
 protected:
     Ogre::SceneNode* mInsert;
 
     float mTime;
-    GroupTimes mCurGroup;
-    GroupTimes mNextGroup;
+    Group mCurGroup;
+    Group mNextGroup;
 
     bool mSkipFrame;
 
     NifOgre::EntityList mEntityList;
     NifOgre::TextKeyMap mTextKeys;
 
-    bool findGroupTimes(const std::string &groupname, GroupTimes *times);
+
     bool findCustomGroupNote(const std::string &groupname,const std::string &note,float time);
+    bool findGroupInfo(const std::string &groupname,
+                       const std::string &begin, const std::string &beginloop,
+                       const std::string &endloop, const std::string &end,
+                       Animation::Group *group);
+
+    void createEntityList(Ogre::SceneNode *node, const std::string model);
 
 public:
     Animation();
     virtual ~Animation();
+
+    void playAnim(const std::string &groupname, const std::string &begin, const std::string &end);
+    void loopAnim(const std::string &groupname,
+                  const std::string &begin, const std::string &beginloop,
+                  const std::string &endloop, const std::string &end, int loops);
 
     void playGroup(std::string groupname, int mode, int loops);
     void skipAnim();

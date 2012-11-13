@@ -87,9 +87,10 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     assert(mInsert);
 
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
+
     std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
 
-    mEntityList = NifOgre::NIFLoader::createEntities(mInsert, &mTextKeys, smodel);
+    createEntityList(node, smodel);
     for(size_t i = 0;i < mEntityList.mEntities.size();i++)
     {
         Ogre::Entity *base = mEntityList.mEntities[i];
@@ -115,18 +116,6 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
             }
         }
         base->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
-    }
-
-    if(mEntityList.mSkelBase)
-    {
-        Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
-        Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
-        while(as.hasMoreElements())
-        {
-            Ogre::AnimationState *state = as.getNext();
-            state->setEnabled(true);
-            state->setLoop(false);
-        }
     }
 
     float scale = race->mData.mHeight.mMale;
@@ -358,8 +347,21 @@ void NpcAnimation::updateParts()
                 part = partStore.search(mBodyPrefix + "_m_" + PartTypeList[i].name[1]);
             }
 
-            if(part)
-                addOrReplaceIndividualPart(PartTypeList[i].type, -1,1, "meshes\\"+part->mModel);
+            //Chris branch
+            /*bool tryfemale = isFemale;
+            do {
+                const ESM::BodyPart *part;
+                part = store.bodyParts.search(bodyRaceID+(tryfemale?"_f_":"_m_")+PartTypeList[i].name[0]);
+                if(!part && PartTypeList[i].name[1][0])
+                    part = store.bodyParts.search(bodyRaceID+(tryfemale?"_f_":"_m_")+PartTypeList[i].name[1]);
+                if(part)
+                {
+                    addOrReplaceIndividualPart(PartTypeList[i].type, -1,1, "meshes\\"+part->mModel);
+                    break;
+                }*/
+                if(part) addOrReplaceIndividualPart(PartTypeList[i].type, -1,1, "meshes\\"+part->mModel);
+                //tryfemale = !tryfemale;
+            //} while(!tryfemale);
         }
     }
 }
