@@ -639,4 +639,9 @@ namespace MWMechanics
             permChange = success ? -int(cappedDispositionChange/ fPerTempMult) : y;
         }
     }
+
+    void MechanicsManager::animationNotify(MWWorld::Ptr& ptr, std::string notification)
+    {
+        std::cout << notification<<ptr.getTypeName();
+    }
 }

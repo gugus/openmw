@@ -91,6 +91,9 @@ namespace MWMechanics
             virtual void getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
                 float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange);
             ///< Perform a persuasion action on NPC
+
+            virtual void animationNotify(MWWorld::Ptr& ptr, std::string notification);
+            ///< Called when an animation hit a text note (like "attach", "stop", whatever)
     };
 }
 

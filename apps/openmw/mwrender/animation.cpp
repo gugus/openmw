@@ -7,6 +7,9 @@
 #include <OgreSubMesh.h>
 #include <OgreSceneManager.h>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 namespace MWRender
 {
@@ -101,10 +104,10 @@ bool Animation::findGroupInfo(const std::string &groupname, const std::string &b
     const std::string &stoploop = groupname+": "+endloop;
     const std::string &stop = groupname+": "+end;
 
-    const std::string &start2 = groupname+" start";
+    /*const std::string &start2 = groupname+" start";
     const std::string &startloop2 = groupname+" loop start";
     const std::string &stop2 = groupname+" stop";
-    const std::string &stoploop2 = groupname+" loop stop";
+    const std::string &stoploop2 = groupname+" loop stop";*/
 
     NifOgre::TextKeyMap::const_iterator iter;
     for(iter = mTextKeys.begin();iter != mTextKeys.end();iter++)
@@ -146,7 +149,7 @@ bool Animation::findGroupInfo(const std::string &groupname, const std::string &b
             return true;
         }
 
-        if(start2.size() <= strlen && std::mismatch(strpos, strend, start2.begin(), checklow()).first == strend)
+        /*if(start2.size() <= strlen && std::mismatch(strpos, strend, start2.begin(), checklow()).first == strend)
         {
             times->mStart = iter->first;
             times->mLoopStart = iter->first;
@@ -165,7 +168,7 @@ bool Animation::findGroupInfo(const std::string &groupname, const std::string &b
             if(times->mLoopStop < 0.0f)
                 times->mLoopStop = iter->first;
             break;
-        }
+        }*/
     }
 
     return false;
@@ -177,6 +180,9 @@ void Animation::processGroup(Group &group, float time)
     while(group.mNext != mTextKeys.end() && time >= group.mNext->first)
     {
         // TODO: Process group.mNext->second
+        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle(mInsert->getParent()->getName());
+        if(MWBase::Environment::get().getMechanicsManager()) MWBase::Environment::get().getMechanicsManager()->animationNotify(ptr,group.mNext->second);
+
         group.mNext++;
     }
 }
