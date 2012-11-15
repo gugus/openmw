@@ -255,10 +255,12 @@ namespace MWBase
             /// \return pointer to created record
 
             virtual void playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,
-                int mode, int number = 1) = 0;
+                int mode, std::string begin = "start", std::string end = "stop", int number = 1) = 0;
             ///< Run animation for a MW-reference. Calls to this function for references that are
             /// currently not in the rendered scene should be ignored.
             ///
+            /// \param begin start marker of the animation. Usualy it's "start", but it can be "equip start" for exemple.
+            /// \param end same as begin parameter
             /// \param mode: 0 normal, 1 immediate start, 2 immediate loop
             /// \param number How offen the animation should be run
 

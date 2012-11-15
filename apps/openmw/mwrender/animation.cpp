@@ -237,6 +237,7 @@ bool Animation::findCustomGroupNote(const std::string &groupname,const std::stri
 
 void Animation::playGroup(std::string groupname, int mode, int loops)
 {
+    std::cout << "playanim" << groupname;
     if(!mEntityList.mSkelBase)
         throw std::runtime_error("No skeleton on actor");
     std::transform(groupname.begin(), groupname.end(), groupname.begin(), ::tolower);

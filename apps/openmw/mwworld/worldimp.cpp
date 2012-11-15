@@ -818,10 +818,10 @@ namespace MWWorld
         return ret;
     }
 
-    void World::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
-        int number)
+    void World::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,
+        int mode, std::string begin, std::string end, int number)
     {
-        mRendering->playAnimationGroup (ptr, groupName, mode, number);
+        mRendering->playAnimationGroup (ptr, groupName, mode, begin, end, number);
     }
 
     void World::skipAnimation (const MWWorld::Ptr& ptr)

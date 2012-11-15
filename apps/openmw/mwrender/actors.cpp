@@ -122,9 +122,14 @@ void Actors::removeCell(MWWorld::Ptr::CellStore* store){
     }
 }
 
-void Actors::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number){
-    if(mAllActors.find(ptr) != mAllActors.end())
-        mAllActors[ptr]->playGroup(groupName, mode, number);
+void Actors::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode, 
+    std::string begin, std::string end, int number){
+    if(mAllActors.find(ptr) != mAllActors.end()){
+        if(begin == "start" && end == "stop")
+            mAllActors[ptr]->playGroup(groupName, mode, number);
+        else
+            mAllActors[ptr]->playAnim(groupName,begin,end);
+    }
 }
 void Actors::skipAnimation (const MWWorld::Ptr& ptr){
     if(mAllActors.find(ptr) != mAllActors.end())

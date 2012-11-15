@@ -54,7 +54,7 @@ namespace MWScript
                             throw std::runtime_error ("animation mode out of range");
                     }
 
-                    MWBase::Environment::get().getWorld()->playAnimationGroup (ptr, group, mode, 1);
+                    MWBase::Environment::get().getWorld()->playAnimationGroup (ptr, group, mode, "equip start", "equip stop", 1);
                }
         };
 
@@ -87,7 +87,7 @@ namespace MWScript
                             throw std::runtime_error ("animation mode out of range");
                     }
 
-                    MWBase::Environment::get().getWorld()->playAnimationGroup (ptr, group, mode, loops);
+                    MWBase::Environment::get().getWorld()->playAnimationGroup (ptr, group, mode, "start", "stop", loops);
                }
         };
 

@@ -643,5 +643,17 @@ namespace MWMechanics
     void MechanicsManager::animationNotify(MWWorld::Ptr& ptr, std::string notification)
     {
         std::cout << notification<<ptr.getTypeName();
+        if(toLower(notification) == "weapononehand: equip start")
+        {
+            MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_Drawing_Weapon);
+        }
+        if(toLower(notification) == "weapononehand: equip attach")
+        {
+            MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_Drawing_Weapon_Attached);
+        }
+        if(toLower(notification) == "weapononehand: equip stop")
+        {
+            MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_Weapon);
+        }
     }
 }

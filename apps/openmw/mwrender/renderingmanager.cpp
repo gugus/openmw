@@ -569,9 +569,13 @@ void RenderingManager::toggleLight()
 }
 
 void RenderingManager::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,
-     int mode, int number)
+     int mode, std::string begin, std::string end, int number)
 {
-    mActors.playAnimationGroup(ptr, groupName, mode, number);
+    if (ptr == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
+    {
+        mPlayer->mAnimation->playAnim(groupName,begin,end);
+    }
+    mActors.playAnimationGroup(ptr, groupName, mode, begin, end, number);
 }
 
 void RenderingManager::skipAnimation (const MWWorld::Ptr& ptr)

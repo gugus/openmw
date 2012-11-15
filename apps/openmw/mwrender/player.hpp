@@ -30,7 +30,7 @@ namespace MWRender
         Ogre::SceneNode *mPlayerNode;
         Ogre::SceneNode *mCameraNode;
 
-        NpcAnimation *mAnimation;
+        //NpcAnimation *mAnimation;
 
         bool mFirstPersonView;
         bool mPreviewMode;
@@ -51,6 +51,8 @@ namespace MWRender
         void setLowHeight(bool low = true);
 
     public:
+
+        NpcAnimation *mAnimation;
 
         Player (Ogre::Camera *camera, Ogre::SceneNode* mNode);
         ~Player();

@@ -32,7 +32,7 @@ namespace MWRender{
         void removeCell(MWWorld::CellStore* store);
 
         void playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
-        int number = 1);
+            std::string begin = "start", std::string end = "stop", int number = 1);
         ///< Run animation for a MW-reference. Calls to this function for references that are currently not
         /// in the rendered scene should be ignored.
         ///

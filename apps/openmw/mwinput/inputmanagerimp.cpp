@@ -536,7 +536,9 @@ namespace MWInput
         MWMechanics::DrawState_ state = mPlayer.getDrawState();
         if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
         {
-            mPlayer.setDrawState(MWMechanics::DrawState_Weapon);
+            MWBase::Environment::get().getWorld()->playAnimationGroup(mPlayer.getPlayer(),"Idle", 0);//,"equip start", "equip end");
+            std::cout << mPlayer.getPlayer().getTypeName();
+            //mPlayer.setDrawState(MWMechanics::DrawState_Weapon);
             std::cout << "Player is now drawing his weapon.\n" << std::endl;
         }
         else

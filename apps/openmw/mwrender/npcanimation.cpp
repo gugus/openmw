@@ -8,6 +8,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 #include "renderconst.hpp"
 
@@ -63,7 +64,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     mGloveL(mInv.end()),
     mGloveR(mInv.end()),
     mSkirtIter(mInv.end()),
-    mWeapon(mInv.end())
+    mWeapon(mInv.end()),
+    mIsWeaponChanging(false)
 {
     mNpc = ptr.get<ESM::NPC>()->mBase;
 
@@ -287,11 +289,33 @@ void NpcAnimation::updateParts()
         }
         if(mWeapon != mInv.end())
         {
-            const ESM::Weapon* weapon = (mWeapon->get<ESM::Weapon>())->mBase;
-            addOrReplaceIndividualPart(ESM::PRT_Weapon,MWWorld::InventoryStore::Slot_CarriedRight,1,"meshes\\" + weapon->mModel);
-            //std::vector<ESM::PartReference> parts = weapon->mP
+            mIsWeaponChanging = true;
             std::cout << "trying to equip weapon...\n";
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle(mInsert->getParent()->getName());
+            //MWWorld::Class::get(ptr).getNpcStats().getDrawState()
+            if(MWWorld::Class::get(ptr).getNpcStats(ptr).getDrawState() == MWMechanics::DrawState_Drawing_Weapon_Attached)
+            {
+                const ESM::Weapon* weapon = (mWeapon->get<ESM::Weapon>())->mBase;
+                addOrReplaceIndividualPart(ESM::PRT_Weapon,MWWorld::InventoryStore::Slot_CarriedRight,1,"meshes\\" + weapon->mModel);
+                //std::vector<ESM::PartReference> parts = weapon->mP
+                std::cout << "trying to equip weapon...\n";
+            }
         }
+    }
+
+    if(mIsWeaponChanging)
+    {
+            std::cout << "trying to equip weapon...\n";
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle(mInsert->getParent()->getName());
+            //MWWorld::Class::get(ptr).getNpcStats().getDrawState()
+            if(MWWorld::Class::get(ptr).getNpcStats(ptr).getDrawState() == MWMechanics::DrawState_Drawing_Weapon_Attached)
+            {
+                const ESM::Weapon* weapon = (mWeapon->get<ESM::Weapon>())->mBase;
+                addOrReplaceIndividualPart(ESM::PRT_Weapon,MWWorld::InventoryStore::Slot_CarriedRight,1,"meshes\\" + weapon->mModel);
+                mIsWeaponChanging = false;
+                //std::vector<ESM::PartReference> parts = weapon->mP
+                std::cout << "trying to equip weapon...\n";
+            }
     }
 
     if(mPartPriorities[ESM::PRT_Head] < 1)
