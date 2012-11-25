@@ -49,6 +49,8 @@ private:
     NifOgre::EntityList mHead;
     NifOgre::EntityList mChest;
     NifOgre::EntityList mTail;
+    NifOgre::EntityList mCarriedRight;
+    NifOgre::EntityList mShield;
 
     const ESM::NPC  *mNpc;
     std::string     mHeadModel;
@@ -70,7 +72,8 @@ private:
     MWWorld::ContainerStoreIterator mGloveR;
     MWWorld::ContainerStoreIterator mSkirtIter;
     MWWorld::ContainerStoreIterator mWeapon;
-    bool mIsWeaponChanging;
+
+    bool mIsEnvironementReady;
 
     int mVisibilityFlags;
 

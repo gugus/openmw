@@ -65,7 +65,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     mGloveR(mInv.end()),
     mSkirtIter(mInv.end()),
     mWeapon(mInv.end()),
-    mIsWeaponChanging(false)
+    mIsEnvironementReady(false)
 {
     mNpc = ptr.get<ESM::NPC>()->mBase;
 
@@ -159,6 +159,7 @@ void NpcAnimation::updateParts()
             *slotlist[i].iter = iter;
             removePartGroup(slotlist[i].slot);
             apparelChanged = true;
+            mIsEnvironementReady = true;//Openmw subsystems should be ready at this point.
         }
     }
 
@@ -287,10 +288,10 @@ void NpcAnimation::updateParts()
             std::vector<ESM::PartReference> parts = clothes->mParts.mParts;
             addPartGroup(MWWorld::InventoryStore::Slot_Pants, 2, parts);
         }
-        if(mWeapon != mInv.end())
+        /*if(mWeapon != mInv.end())
         {
             mIsWeaponChanging = true;
-            std::cout << "trying to equip weapon...\n";
+            //std::cout << "trying to equip weapon... 1 \n";
             MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle(mInsert->getParent()->getName());
             //MWWorld::Class::get(ptr).getNpcStats().getDrawState()
             if(MWWorld::Class::get(ptr).getNpcStats(ptr).getDrawState() == MWMechanics::DrawState_Drawing_Weapon_Attached)
@@ -298,25 +299,41 @@ void NpcAnimation::updateParts()
                 const ESM::Weapon* weapon = (mWeapon->get<ESM::Weapon>())->mBase;
                 addOrReplaceIndividualPart(ESM::PRT_Weapon,MWWorld::InventoryStore::Slot_CarriedRight,1,"meshes\\" + weapon->mModel);
                 //std::vector<ESM::PartReference> parts = weapon->mP
-                std::cout << "trying to equip weapon...\n";
+                //std::cout << "trying to equip weapon... 2 \n";
             }
-        }
+        }*/
     }
 
-    if(mIsWeaponChanging)
+    if(mIsEnvironementReady)
     {
-            std::cout << "trying to equip weapon...\n";
+            //std::cout << "trying to equip weapon... 3 \n";
             MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle(mInsert->getParent()->getName());
             //MWWorld::Class::get(ptr).getNpcStats().getDrawState()
             if(MWWorld::Class::get(ptr).getNpcStats(ptr).getDrawState() == MWMechanics::DrawState_Drawing_Weapon_Attached)
             {
                 const ESM::Weapon* weapon = (mWeapon->get<ESM::Weapon>())->mBase;
                 addOrReplaceIndividualPart(ESM::PRT_Weapon,MWWorld::InventoryStore::Slot_CarriedRight,1,"meshes\\" + weapon->mModel);
-                mIsWeaponChanging = false;
+                //mIsWeaponChanging = false;
                 //std::vector<ESM::PartReference> parts = weapon->mP
                 std::cout << "trying to equip weapon...\n";
             }
+            if(MWWorld::Class::get(ptr).getNpcStats(ptr).getDrawState() == MWMechanics::DrawState_UnDrawing_Weapon)
+            {
+                std::cout << "trying to remove weapon";
+                removeIndividualPart(ESM::PRT_Weapon);
+            }
     }
+
+    /*MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle(mInsert->getParent()->getName());
+    MWWorld::Class::get(ptr);
+    std::cout <<ptr.getTypeName();*/
+    /*if(MWWorld::Class::get(ptr).getNpcStats(ptr).getDrawState() == MWMechanics::DrawState_UnDrawing_Weapon)
+    {
+        std::cout << "trying to remove weapion";
+        //removeIndividualPart(ESM::PRT_Weapon);
+    }*/
+
+
 
     if(mPartPriorities[ESM::PRT_Head] < 1)
         addOrReplaceIndividualPart(ESM::PRT_Head, -1,1, mHeadModel);
@@ -487,6 +504,7 @@ void NpcAnimation::removeIndividualPart(int type)
         removeEntities(mClavicleL);
     else if(type == ESM::PRT_Weapon)                 //25
     {
+        removeEntities(mCarriedRight);
         std::cout << "REMOVING WEAPON" << std::endl;
     }
     else if(type == ESM::PRT_Tail)    //26
@@ -597,7 +615,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
             mClavicleL = insertBoundedPart(mesh, group, "Left Clavicle");
             break;
         case ESM::PRT_Weapon:                             //25
-            mHandR = insertBoundedPart(mesh,group, "Weapon Bone");
+            mCarriedRight = insertBoundedPart(mesh,group, "Weapon Bone");
             std::cout << "INSERTING WEAPON" << std::endl;
             break;
         case ESM::PRT_Tail:                              //26

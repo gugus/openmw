@@ -655,5 +655,17 @@ namespace MWMechanics
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_Weapon);
         }
+        if(toLower(notification) == "weapononehand: unequip start")
+        {
+            MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_UnDrawing_Weapon_Attached);
+        }
+        if(toLower(notification) == "weapononehand: unequip detach")
+        {
+            MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_UnDrawing_Weapon);
+        }
+        if(toLower(notification) == "weapononehand: unequip stop")
+        {
+            MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_Nothing);
+        }
     }
 }

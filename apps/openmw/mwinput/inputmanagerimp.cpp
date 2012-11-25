@@ -25,6 +25,9 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 
+#include "../mwworld/inventorystore.hpp"
+#include "../mwworld/class.hpp"
+
 namespace MWInput
 {
     InputManager::InputManager(OEngine::Render::OgreRenderer &ogre,
@@ -533,13 +536,49 @@ namespace MWInput
     {
         if (mWindows.isGuiMode()) return;
 
+        std::string weaponType = "";
+
+        MWWorld::ContainerStoreIterator iter = MWWorld::Class::get(mPlayer.getPlayer()).getInventoryStore(mPlayer.getPlayer()).
+            getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+
+        int type = iter->get<ESM::Weapon>()->mBase->mData.mType;
+        if((type == ESM::Weapon::LongBladeOneHand) || (type == ESM::Weapon::AxeOneHand) || (type = ESM::Weapon::BluntOneHand) ||
+            (type = ESM::Weapon::ShortBladeOneHand))
+        {
+            weaponType = "weapononehand";
+        }
+        else if ((type == ESM::Weapon::AxeTwoHand) || (type == ESM::Weapon::BluntTwoClose) || (type == ESM::Weapon::BluntTwoClose) ||
+            (type == ESM::Weapon::LongBladeTwoHand))
+        {
+            weaponType = "weapontwohand";
+        }
+        else if ((type == ESM::Weapon::BluntTwoWide) || (type == ESM::Weapon::SpearTwoWide))
+        {
+            weaponType = "weapontwowide";
+        }
+        else if (type == ESM::Weapon::MarksmanBow)
+        {
+            weaponType  = "bowandarrow";
+        }
+        else if (type == ESM::Weapon::MarksmanCrossbow)
+        {
+            weaponType = "crossbow";
+        }
+        else if (type == ESM::Weapon::MarksmanThrown)
+        {
+            weaponType = "throwweapon";
+        }
         MWMechanics::DrawState_ state = mPlayer.getDrawState();
         if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
-        {
-            MWBase::Environment::get().getWorld()->playAnimationGroup(mPlayer.getPlayer(),"Idle", 0);//,"equip start", "equip end");
+        {            
+            MWBase::Environment::get().getWorld()->playAnimationGroup(mPlayer.getPlayer(),weaponType,0,"equip start", "equip stop");
             std::cout << mPlayer.getPlayer().getTypeName();
             //mPlayer.setDrawState(MWMechanics::DrawState_Weapon);
             std::cout << "Player is now drawing his weapon.\n" << std::endl;
+        }
+        else if (state == MWMechanics::DrawState_Weapon)
+        {
+            MWBase::Environment::get().getWorld()->playAnimationGroup(mPlayer.getPlayer(),weaponType,0,"unequip start", "unequip stop");
         }
         else
         {
