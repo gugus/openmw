@@ -181,8 +181,8 @@ void Animation::processGroup(Group &group, float time)
     {
         // TODO: Process group.mNext->second
         MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle(mInsert->getParent()->getName());
-        if(MWBase::Environment::get().getMechanicsManager()) MWBase::Environment::get().getMechanicsManager()->animationNotify(ptr,group.mNext->second);
-
+        MWBase::Environment::get().getMechanicsManager()->animationNotify(ptr,group.mNext->second);
+        onKeyReached();
         group.mNext++;
     }
 }

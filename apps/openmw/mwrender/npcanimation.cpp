@@ -48,6 +48,7 @@ NpcAnimation::~NpcAnimation()
 
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWorld::InventoryStore& inv, int visibilityFlags)
   : Animation(),
+    mPtr(ptr),
     mStateID(-1),
     mInv(inv),
     mTimeToChange(0),
@@ -65,6 +66,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     mGloveR(mInv.end()),
     mSkirtIter(mInv.end()),
     mWeapon(mInv.end()),
+    mShield(mInv.end()),
     mIsEnvironementReady(false)
 {
     mNpc = ptr.get<ESM::NPC>()->mBase;
@@ -149,7 +151,8 @@ void NpcAnimation::updateParts()
         { &mGloveR, MWWorld::InventoryStore::Slot_RightGauntlet },
         { &mShirt, MWWorld::InventoryStore::Slot_Shirt },
         { &mPants, MWWorld::InventoryStore::Slot_Pants },
-        { &mWeapon, MWWorld::InventoryStore::Slot_CarriedRight}
+        { &mWeapon, MWWorld::InventoryStore::Slot_CarriedRight},
+        { &mShield, MWWorld::InventoryStore::Slot_CarriedLeft}
     };
     for(size_t i = 0;i < sizeof(slotlist)/sizeof(slotlist[0]);i++)
     {
@@ -288,6 +291,12 @@ void NpcAnimation::updateParts()
             std::vector<ESM::PartReference> parts = clothes->mParts.mParts;
             addPartGroup(MWWorld::InventoryStore::Slot_Pants, 2, parts);
         }
+        if(mShield != mInv.end())
+        {
+            const ESM::Armor *armor = (mShield->get<ESM::Armor>())->mBase;
+            std::vector<ESM::PartReference> parts = armor->mParts.mParts;
+            addPartGroup(MWWorld::InventoryStore::Slot_CarriedRight, 2, parts);
+        }
         /*if(mWeapon != mInv.end())
         {
             mIsWeaponChanging = true;
@@ -296,32 +305,12 @@ void NpcAnimation::updateParts()
             //MWWorld::Class::get(ptr).getNpcStats().getDrawState()
             if(MWWorld::Class::get(ptr).getNpcStats(ptr).getDrawState() == MWMechanics::DrawState_Drawing_Weapon_Attached)
             {
-                const ESM::Weapon* weapon = (mWeapon->get<ESM::Weapon>())->mBase;
+                const ESM::Weapon* weapon = (mWeapon->get<ESM::Weapon>())->moase;
                 addOrReplaceIndividualPart(ESM::PRT_Weapon,MWWorld::InventoryStore::Slot_CarriedRight,1,"meshes\\" + weapon->mModel);
                 //std::vector<ESM::PartReference> parts = weapon->mP
                 //std::cout << "trying to equip weapon... 2 \n";
             }
         }*/
-    }
-
-    if(mIsEnvironementReady)
-    {
-            //std::cout << "trying to equip weapon... 3 \n";
-            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle(mInsert->getParent()->getName());
-            //MWWorld::Class::get(ptr).getNpcStats().getDrawState()
-            if(MWWorld::Class::get(ptr).getNpcStats(ptr).getDrawState() == MWMechanics::DrawState_Drawing_Weapon_Attached)
-            {
-                const ESM::Weapon* weapon = (mWeapon->get<ESM::Weapon>())->mBase;
-                addOrReplaceIndividualPart(ESM::PRT_Weapon,MWWorld::InventoryStore::Slot_CarriedRight,1,"meshes\\" + weapon->mModel);
-                //mIsWeaponChanging = false;
-                //std::vector<ESM::PartReference> parts = weapon->mP
-                std::cout << "trying to equip weapon...\n";
-            }
-            if(MWWorld::Class::get(ptr).getNpcStats(ptr).getDrawState() == MWMechanics::DrawState_UnDrawing_Weapon)
-            {
-                std::cout << "trying to remove weapon";
-                removeIndividualPart(ESM::PRT_Weapon);
-            }
     }
 
     /*MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle(mInsert->getParent()->getName());
@@ -404,6 +393,29 @@ void NpcAnimation::updateParts()
                 //tryfemale = !tryfemale;
             //} while(!tryfemale);
         }
+    }
+}
+
+void NpcAnimation::onKeyReached()
+{
+    // equip or unequip weapon
+    if(mIsEnvironementReady)
+    {
+            //std::cout << "trying to equip weapon... 3 \n";
+            //MWWorld::Class::get(ptr).getNpcStats().getDrawState()
+            if(MWWorld::Class::get(mPtr).getNpcStats(mPtr).getDrawState() == MWMechanics::DrawState_Drawing_Weapon_Attached)
+            {
+                const ESM::Weapon* weapon = (mWeapon->get<ESM::Weapon>())->mBase;
+                addOrReplaceIndividualPart(ESM::PRT_Weapon,MWWorld::InventoryStore::Slot_CarriedRight,1,"meshes\\" + weapon->mModel);
+                //mIsWeaponChanging = false;
+                //std::vector<ESM::PartReference> parts = weapon->mP
+                std::cout << "trying to equip weapon...\n";
+            }
+            if(MWWorld::Class::get(mPtr).getNpcStats(mPtr).getDrawState() == MWMechanics::DrawState_UnDrawing_Weapon)
+            {
+                std::cout << "trying to remove weapon";
+                removeIndividualPart(ESM::PRT_Weapon);
+            }
     }
 }
 
@@ -571,6 +583,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
             mWristL = insertBoundedPart(mesh, group, "Left Wrist");
             break;
         case ESM::PRT_Shield:                         //10
+            mCarriedLeft = insertBoundedPart(mesh,group, "Shield Bone");
             break;
         case ESM::PRT_RForearm:                          //11
             mForearmR = insertBoundedPart(mesh, group, "Right Forearm");

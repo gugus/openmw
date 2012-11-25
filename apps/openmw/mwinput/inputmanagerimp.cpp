@@ -542,8 +542,9 @@ namespace MWInput
             getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
 
         int type = iter->get<ESM::Weapon>()->mBase->mData.mType;
-        if((type == ESM::Weapon::LongBladeOneHand) || (type == ESM::Weapon::AxeOneHand) || (type = ESM::Weapon::BluntOneHand) ||
-            (type = ESM::Weapon::ShortBladeOneHand))
+
+        if((type == ESM::Weapon::LongBladeOneHand) || (type == ESM::Weapon::AxeOneHand) || (type == ESM::Weapon::BluntOneHand) ||
+            (type == ESM::Weapon::ShortBladeOneHand))
         {
             weaponType = "weapononehand";
         }
@@ -568,6 +569,7 @@ namespace MWInput
         {
             weaponType = "throwweapon";
         }
+
         MWMechanics::DrawState_ state = mPlayer.getDrawState();
         if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
         {            

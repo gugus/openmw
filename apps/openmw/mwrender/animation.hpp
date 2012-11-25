@@ -59,6 +59,8 @@ protected:
 
     void createEntityList(Ogre::SceneNode *node, const std::string model);
 
+    virtual void onKeyReached () {}
+
 public:
     Animation();
     virtual ~Animation();

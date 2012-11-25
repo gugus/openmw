@@ -50,12 +50,14 @@ private:
     NifOgre::EntityList mChest;
     NifOgre::EntityList mTail;
     NifOgre::EntityList mCarriedRight;
-    NifOgre::EntityList mShield;
+    NifOgre::EntityList mCarriedLeft;
 
     const ESM::NPC  *mNpc;
     std::string     mHeadModel;
     std::string     mHairModel;
     std::string     mBodyPrefix;
+
+    MWWorld::Ptr mPtr;
 
 
     float mTimeToChange;
@@ -72,10 +74,14 @@ private:
     MWWorld::ContainerStoreIterator mGloveR;
     MWWorld::ContainerStoreIterator mSkirtIter;
     MWWorld::ContainerStoreIterator mWeapon;
+    MWWorld::ContainerStoreIterator mShield;
 
     bool mIsEnvironementReady;
 
     int mVisibilityFlags;
+
+protected:
+    virtual void onKeyReached();
 
 public:
     NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node,
