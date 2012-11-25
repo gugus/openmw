@@ -50,7 +50,7 @@ private:
     NifOgre::EntityList mChest;
     NifOgre::EntityList mTail;
     NifOgre::EntityList mCarriedRight;
-    NifOgre::EntityList mShield;
+    NifOgre::EntityList mCarriedLeft;
 
     const ESM::NPC  *mNpc;
     std::string     mHeadModel;
@@ -74,6 +74,7 @@ private:
     MWWorld::ContainerStoreIterator mGloveR;
     MWWorld::ContainerStoreIterator mSkirtIter;
     MWWorld::ContainerStoreIterator mWeapon;
+    MWWorld::ContainerStoreIterator mShield;
 
     bool mIsEnvironementReady;
 
