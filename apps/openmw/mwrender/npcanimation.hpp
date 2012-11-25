@@ -57,6 +57,8 @@ private:
     std::string     mHairModel;
     std::string     mBodyPrefix;
 
+    MWWorld::Ptr mPtr;
+
 
     float mTimeToChange;
     MWWorld::ContainerStoreIterator mRobe;
@@ -76,6 +78,9 @@ private:
     bool mIsEnvironementReady;
 
     int mVisibilityFlags;
+
+protected:
+    virtual void onKeyReached();
 
 public:
     NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node,

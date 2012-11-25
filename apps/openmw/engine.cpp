@@ -334,6 +334,9 @@ void OMW::Engine::go()
     mEnvironment.setWorld (new MWWorld::World (*mOgre, mFileCollections, mMaster,
         mResDir, mCfgMgr.getCachePath(), mNewGame, mEncoding, mFallbackMap));
 
+    // Create game mechanics system
+    mEnvironment.setMechanicsManager (new MWMechanics::MechanicsManager);
+
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
 
@@ -350,9 +353,6 @@ void OMW::Engine::go()
 
     mEnvironment.setScriptManager (new MWScript::ScriptManager (MWBase::Environment::get().getWorld()->getStore(),
         mVerboseScripts, *mScriptContext));
-
-    // Create game mechanics system
-    mEnvironment.setMechanicsManager (new MWMechanics::MechanicsManager);
 
     // Create dialog system
     mEnvironment.setJournal (new MWDialogue::Journal);
