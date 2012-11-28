@@ -6,6 +6,7 @@
 #include "inventorystore.hpp"
 #include "player.hpp"
 #include "class.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 namespace MWWorld
 {
@@ -28,6 +29,14 @@ namespace MWWorld
             if (*it == getTarget())
             {
                 break;
+            }
+        }
+        if(getTarget().getTypeName() == typeid(ESM::Weapon).name())
+        {
+            if(MWWorld::Class::get(player).getNpcStats(player).getDrawState() != MWMechanics::DrawState_Nothing)
+            {
+                std::cout << "cannot change weapon while one is already in use";
+                return;
             }
         }
 

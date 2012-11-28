@@ -10,6 +10,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 namespace MWMechanics
 {
@@ -642,28 +643,61 @@ namespace MWMechanics
 
     void MechanicsManager::animationNotify(MWWorld::Ptr& ptr, std::string notification)
     {
+        //MWWorld::Class::get(ptr);
+        MWWorld::ContainerStoreIterator iter = MWWorld::Class::get(ptr).getInventoryStore(ptr).
+            getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        std::string weaponType = "";
+
+        int type = iter->get<ESM::Weapon>()->mBase->mData.mType;
+
+        if((type == ESM::Weapon::LongBladeOneHand) || (type == ESM::Weapon::AxeOneHand) || (type == ESM::Weapon::BluntOneHand) ||
+            (type == ESM::Weapon::ShortBladeOneHand))
+        {
+            weaponType = weaponType + "";
+        }
+        else if ((type == ESM::Weapon::AxeTwoHand) || (type == ESM::Weapon::BluntTwoClose) || (type == ESM::Weapon::BluntTwoClose) ||
+            (type == ESM::Weapon::LongBladeTwoHand))
+        {
+            weaponType = "weapontwohand";
+        }
+        else if ((type == ESM::Weapon::BluntTwoWide) || (type == ESM::Weapon::SpearTwoWide))
+        {
+            weaponType = "weapontwowide";
+        }
+        else if (type == ESM::Weapon::MarksmanBow)
+        {
+            weaponType  = "bowandarrow";
+        }
+        else if (type == ESM::Weapon::MarksmanCrossbow)
+        {
+            weaponType = "crossbow";
+        }
+        else if (type == ESM::Weapon::MarksmanThrown)
+        {
+            weaponType = "throwweapon";
+        }
         std::cout << notification<<ptr.getTypeName();
-        if(toLower(notification) == "weapononehand: equip start")
+        if(toLower(notification) == weaponType + ": equip start")
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_Drawing_Weapon);
         }
-        if(toLower(notification) == "weapononehand: equip attach")
+        if(toLower(notification) == weaponType + ": equip attach")
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_Drawing_Weapon_Attached);
         }
-        if(toLower(notification) == "weapononehand: equip stop")
+        if(toLower(notification) == weaponType + ": equip stop")
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_Weapon);
         }
-        if(toLower(notification) == "weapononehand: unequip start")
+        if(toLower(notification) == weaponType + ": unequip start")
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_UnDrawing_Weapon_Attached);
         }
-        if(toLower(notification) == "weapononehand: unequip detach")
+        if(toLower(notification) == weaponType + ": unequip detach")
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_UnDrawing_Weapon);
         }
-        if(toLower(notification) == "weapononehand: unequip stop")
+        if(toLower(notification) == weaponType + ": unequip stop")
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_Nothing);
         }
