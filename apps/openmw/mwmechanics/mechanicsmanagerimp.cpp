@@ -653,7 +653,7 @@ namespace MWMechanics
         if((type == ESM::Weapon::LongBladeOneHand) || (type == ESM::Weapon::AxeOneHand) || (type == ESM::Weapon::BluntOneHand) ||
             (type == ESM::Weapon::ShortBladeOneHand))
         {
-            weaponType = weaponType + "";
+            weaponType = "weapononehand";
         }
         else if ((type == ESM::Weapon::AxeTwoHand) || (type == ESM::Weapon::BluntTwoClose) || (type == ESM::Weapon::BluntTwoClose) ||
             (type == ESM::Weapon::LongBladeTwoHand))

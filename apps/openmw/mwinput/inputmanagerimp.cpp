@@ -541,6 +541,12 @@ namespace MWInput
         MWWorld::ContainerStoreIterator iter = MWWorld::Class::get(mPlayer.getPlayer()).getInventoryStore(mPlayer.getPlayer()).
             getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
 
+        if (iter == MWWorld::Class::get(mPlayer.getPlayer()).getInventoryStore(mPlayer.getPlayer()).end())
+        {
+            ///\ TODO: hand to hand animation
+            return;
+        }
+
         int type = iter->get<ESM::Weapon>()->mBase->mData.mType;
 
         if((type == ESM::Weapon::LongBladeOneHand) || (type == ESM::Weapon::AxeOneHand) || (type == ESM::Weapon::BluntOneHand) ||

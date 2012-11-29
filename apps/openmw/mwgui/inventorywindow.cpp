@@ -19,6 +19,8 @@
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/inventorystore.hpp"
 
+#include "../mwmechanics/npcstats.hpp"
+
 #include "widgets.hpp"
 #include "bookwindow.hpp"
 #include "scrollwindow.hpp"
@@ -246,6 +248,15 @@ namespace MWGui
     void InventoryWindow::_unequipItem(MWWorld::Ptr item)
     {
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
+
+        if(item.getTypeName() == typeid(ESM::Weapon).name())
+        {
+            if(MWWorld::Class::get(mPtr).getNpcStats(mPtr).getDrawState() != MWMechanics::DrawState_Nothing)
+            {
+                std::cout << "cannot change weapon while one is already in use";
+                return;
+            }
+        }
 
         for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
         {
