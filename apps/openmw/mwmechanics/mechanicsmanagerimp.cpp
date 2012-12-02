@@ -676,7 +676,7 @@ namespace MWMechanics
         {
             weaponType = "throwweapon";
         }
-        std::cout << notification<<ptr.getTypeName();
+        std::cout << notification;
         if(toLower(notification) == weaponType + ": equip start")
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_Drawing_Weapon);
@@ -700,6 +700,20 @@ namespace MWMechanics
         if(toLower(notification) == weaponType + ": unequip stop")
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_Nothing);
+        }
+        if(toLower(notification) == weaponType + ": thrust hit")
+        {
+            std::cout << "HITTTTTTTINGGGG";
+            std::cout << MWBase::Environment::get().getWorld()->getFacedHandle();
+            if(MWBase::Environment::get().getWorld()->getFacedHandle() != "")
+            {
+                MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtrViaHandle(MWBase::Environment::get().getWorld()->getFacedHandle());
+                if(target != MWWorld::Ptr() && target.getTypeName() == typeid(ESM::NPC).name())
+                {
+                    std::cout << "NPC HITTED";
+                    MWWorld::Class::get(target).getCreatureStats(target).setHealth(0);
+                }
+            }
         }
     }
 }

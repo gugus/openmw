@@ -14,7 +14,9 @@ namespace MWMechanics
         DrawState_Drawing_Weapon = 5,
         DrawState_Drawing_Weapon_Attached = 6,
         DrawState_UnDrawing_Weapon = 7,
-        DrawState_UnDrawing_Weapon_Attached = 8
+        DrawState_UnDrawing_Weapon_Attached = 8,
+        DrawState_Hitting = 9,
+        DrawState_Casting = 10
     };
 }
 

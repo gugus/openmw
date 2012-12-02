@@ -25,6 +25,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 
+#include "../mwmechanics/npcstats.hpp"
+
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
 
@@ -297,6 +299,48 @@ namespace MWInput
                 mPlayer.setUpDown (-1);
             else
                 mPlayer.setUpDown (0);
+
+            if(actionIsActive(A_Use))
+            {
+                if(MWWorld::Class::get(mPlayer.getPlayer()).getNpcStats(mPlayer.getPlayer()).getDrawState() == MWMechanics::DrawState_Weapon)
+                {
+                    std::cout << "hit!";
+                    MWWorld::ContainerStoreIterator iter = MWWorld::Class::get(mPlayer.getPlayer()).getInventoryStore(mPlayer.getPlayer()).
+                        getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                    std::string weaponType = "";
+
+                    int type = iter->get<ESM::Weapon>()->mBase->mData.mType;
+
+                    if((type == ESM::Weapon::LongBladeOneHand) || (type == ESM::Weapon::AxeOneHand) || (type == ESM::Weapon::BluntOneHand) ||
+                        (type == ESM::Weapon::ShortBladeOneHand))
+                    {
+                        weaponType = "weapononehand";
+                    }
+                    else if ((type == ESM::Weapon::AxeTwoHand) || (type == ESM::Weapon::BluntTwoClose) || (type == ESM::Weapon::BluntTwoClose) ||
+                        (type == ESM::Weapon::LongBladeTwoHand))
+                    {
+                        weaponType = "weapontwohand";
+                    }
+                    else if ((type == ESM::Weapon::BluntTwoWide) || (type == ESM::Weapon::SpearTwoWide))
+                    {
+                        weaponType = "weapontwowide";
+                    }
+                    else if (type == ESM::Weapon::MarksmanBow)
+                    {
+                        //weaponType  = "bowandarrow";
+                    }
+                    else if (type == ESM::Weapon::MarksmanCrossbow)
+                    {
+                        //weaponType = "crossbow";
+                    }
+                    else if (type == ESM::Weapon::MarksmanThrown)
+                    {
+                        //weaponType = "throwweapon";
+                    }
+                    if(weaponType != "")
+                        MWBase::Environment::get().getWorld()->playAnimationGroup(mPlayer.getPlayer(),weaponType,0,"thrust start", "thrust large follow stop");
+                }
+            }
 
             if (mControlSwitch["playerviewswitch"]) {
 
