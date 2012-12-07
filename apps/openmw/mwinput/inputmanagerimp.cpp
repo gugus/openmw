@@ -673,7 +673,9 @@ namespace MWInput
     void InputManager::toggleAutoMove()
     {
         if (mWindows.isGuiMode()) return;
-        mPlayer.setAutoMove (!mPlayer.getAutoMove());
+
+        if (mControlSwitch["playercontrols"])
+            mPlayer.setAutoMove (!mPlayer.getAutoMove());
     }
 
     void InputManager::toggleWalking()
