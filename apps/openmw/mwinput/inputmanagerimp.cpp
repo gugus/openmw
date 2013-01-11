@@ -540,8 +540,6 @@ namespace MWInput
 
         std::string weaponType = getWeaponType(mPlayer.getPlayer());
 
-        if(weaponType == "handtohand") return;
-
         MWMechanics::DrawState_ state = mPlayer.getDrawState();
         if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
         {            

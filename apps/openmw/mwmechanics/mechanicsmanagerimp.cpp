@@ -647,7 +647,7 @@ namespace MWMechanics
     {
         std::string weaponType = getWeaponType(ptr);
 
-        std::cout << notification<<ptr.getTypeName();
+
         if(toLower(notification) == weaponType + ": equip start")
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_Drawing_Weapon);
