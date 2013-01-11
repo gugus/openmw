@@ -12,6 +12,8 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
 
+#include "weapontype.hpp"
+
 namespace MWMechanics
 {
     void MechanicsManager::buildPlayer()
@@ -643,39 +645,8 @@ namespace MWMechanics
 
     void MechanicsManager::animationNotify(MWWorld::Ptr& ptr, std::string notification)
     {
-        //MWWorld::Class::get(ptr);
-        MWWorld::ContainerStoreIterator iter = MWWorld::Class::get(ptr).getInventoryStore(ptr).
-            getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-        std::string weaponType = "";
+        std::string weaponType = getWeaponType(ptr);
 
-        int type = iter->get<ESM::Weapon>()->mBase->mData.mType;
-
-        if((type == ESM::Weapon::LongBladeOneHand) || (type == ESM::Weapon::AxeOneHand) || (type == ESM::Weapon::BluntOneHand) ||
-            (type == ESM::Weapon::ShortBladeOneHand))
-        {
-            weaponType = "weapononehand";
-        }
-        else if ((type == ESM::Weapon::AxeTwoHand) || (type == ESM::Weapon::BluntTwoClose) || (type == ESM::Weapon::BluntTwoClose) ||
-            (type == ESM::Weapon::LongBladeTwoHand))
-        {
-            weaponType = "weapontwohand";
-        }
-        else if ((type == ESM::Weapon::BluntTwoWide) || (type == ESM::Weapon::SpearTwoWide))
-        {
-            weaponType = "weapontwowide";
-        }
-        else if (type == ESM::Weapon::MarksmanBow)
-        {
-            weaponType  = "bowandarrow";
-        }
-        else if (type == ESM::Weapon::MarksmanCrossbow)
-        {
-            weaponType = "crossbow";
-        }
-        else if (type == ESM::Weapon::MarksmanThrown)
-        {
-            weaponType = "throwweapon";
-        }
         std::cout << notification<<ptr.getTypeName();
         if(toLower(notification) == weaponType + ": equip start")
         {
