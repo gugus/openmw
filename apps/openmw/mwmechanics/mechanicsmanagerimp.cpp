@@ -637,44 +637,44 @@ namespace MWMechanics
     {
         std::string weaponType = getWeaponType(ptr);
 
-        if(toLower(notification) == "spellcast: equip start")
+        if(Misc::StringUtils::lowerCase(notification) == "spellcast: equip start")
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(MWMechanics::DrawState_Drawing_Spell);
         }
-        if(toLower(notification) == "spellcast: equip stop")
+        if(Misc::StringUtils::lowerCase(notification) == "spellcast: equip stop")
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(MWMechanics::DrawState_Spell);
         }
-        if(toLower(notification) == "spellcast: unequip start")
+        if(Misc::StringUtils::lowerCase(notification) == "spellcast: unequip start")
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(MWMechanics::DrawState_UnDrawing_Spell);
         }
-        if(toLower(notification) == "spellcast: unequip stop")
+        if(Misc::StringUtils::lowerCase(notification) == "spellcast: unequip stop")
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(MWMechanics::DrawState_Nothing);
         }
 
-        if(toLower(notification) == weaponType + ": equip start")
+        if(Misc::StringUtils::lowerCase(notification) == weaponType + ": equip start")
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_Drawing_Weapon);
         }
-        if(toLower(notification) == weaponType + ": equip attach")
+        if(Misc::StringUtils::lowerCase(notification) == weaponType + ": equip attach")
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_Drawing_Weapon_Attached);
         }
-        if(toLower(notification) == weaponType + ": equip stop")
+        if(Misc::StringUtils::lowerCase(notification) == weaponType + ": equip stop")
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_Weapon);
         }
-        if(toLower(notification) == weaponType + ": unequip start")
+        if(Misc::StringUtils::lowerCase(notification) == weaponType + ": unequip start")
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_UnDrawing_Weapon_Attached);
         }
-        if(toLower(notification) == weaponType + ": unequip detach")
+        if(Misc::StringUtils::lowerCase(notification) == weaponType + ": unequip detach")
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_UnDrawing_Weapon);
         }
-        if(toLower(notification) == weaponType + ": unequip stop")
+        if(Misc::StringUtils::lowerCase(notification) == weaponType + ": unequip stop")
         {
             MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(DrawState_Nothing);
         }
