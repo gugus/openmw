@@ -522,10 +522,15 @@ namespace MWInput
         if (mWindows.isGuiMode()) return;
 
         MWMechanics::DrawState_ state = mPlayer.getDrawState();
-        if (state == MWMechanics::DrawState_Weapon || state == MWMechanics::DrawState_Nothing)
+        if (state == MWMechanics::DrawState_Nothing)
         {
-            mPlayer.setDrawState(MWMechanics::DrawState_Spell);
+            //mPlayer.setDrawState(MWMechanics::DrawState_Spell);
+            MWBase::Environment::get().getWorld()->playAnimationGroup(mPlayer.getPlayer(),"spellcast",0,"equip start", "equip stop");
             std::cout << "Player has now readied his hands for spellcasting!\n" << std::endl;
+        }
+        if(state == MWMechanics::DrawState_Spell)
+        {
+            MWBase::Environment::get().getWorld()->playAnimationGroup(mPlayer.getPlayer(),"spellcast",0,"unequip start", "unequip stop");
         }
         else
         {
@@ -541,7 +546,7 @@ namespace MWInput
         std::string weaponType = getWeaponType(mPlayer.getPlayer());
 
         MWMechanics::DrawState_ state = mPlayer.getDrawState();
-        if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
+        if (state == MWMechanics::DrawState_Nothing)
         {            
             MWBase::Environment::get().getWorld()->playAnimationGroup(mPlayer.getPlayer(),weaponType,0,"equip start", "equip stop");
             std::cout << mPlayer.getPlayer().getTypeName();

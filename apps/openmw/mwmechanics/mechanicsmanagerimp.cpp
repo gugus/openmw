@@ -647,6 +647,22 @@ namespace MWMechanics
     {
         std::string weaponType = getWeaponType(ptr);
 
+        if(toLower(notification) == "spellcast: equip start")
+        {
+            MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(MWMechanics::DrawState_Drawing_Spell);
+        }
+        if(toLower(notification) == "spellcast: equip stop")
+        {
+            MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(MWMechanics::DrawState_Spell);
+        }
+        if(toLower(notification) == "spellcast: unequip start")
+        {
+            MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(MWMechanics::DrawState_UnDrawing_Spell);
+        }
+        if(toLower(notification) == "spellcast: unequip stop")
+        {
+            MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState(MWMechanics::DrawState_Nothing);
+        }
 
         if(toLower(notification) == weaponType + ": equip start")
         {
