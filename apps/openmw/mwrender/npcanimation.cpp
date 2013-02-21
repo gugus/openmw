@@ -26,7 +26,7 @@ const NpcAnimation::PartInfo NpcAnimation::sPartList[NpcAnimation::sPartListSize
     { ESM::PRT_LHand, "Left Hand" },
     { ESM::PRT_RWrist, "Right Wrist" },
     { ESM::PRT_LWrist, "Left Wrist" },
-    { ESM::PRT_Shield, "Shield" },
+    { ESM::PRT_Shield, "Shield Bone" },
     { ESM::PRT_RForearm, "Right Forearm" },
     { ESM::PRT_LForearm, "Left Forearm" },
     { ESM::PRT_RUpperarm, "Right Upper Arm" },
@@ -41,7 +41,7 @@ const NpcAnimation::PartInfo NpcAnimation::sPartList[NpcAnimation::sPartListSize
     { ESM::PRT_LLeg, "Left Upper Leg" },
     { ESM::PRT_RPauldron, "Right Clavicle" },
     { ESM::PRT_LPauldron, "Left Clavicle" },
-    { ESM::PRT_Weapon, "Weapon" },
+    { ESM::PRT_Weapon, "Weapon Bone" },
     { ESM::PRT_Tail, "Tail" }
 };
 
@@ -69,7 +69,9 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     mPants(mInv.end()),
     mGloveL(mInv.end()),
     mGloveR(mInv.end()),
-    mSkirtIter(mInv.end())
+    mSkirtIter(mInv.end()),
+    mWeapon(mInv.end()),
+    mShield(mInv.end())
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -209,6 +211,16 @@ void NpcAnimation::updateParts()
           &NpcAnimation::mPants, MWWorld::InventoryStore::Slot_Pants,
           0, { }
         },
+
+        { 0, { },
+          &NpcAnimation::mWeapon, MWWorld::InventoryStore::Slot_CarriedRight,
+          0, { }
+        },
+
+        { 0, { },
+          &NpcAnimation::mShield, MWWorld::InventoryStore::Slot_CarriedLeft,
+          0, { }
+        },       
     };
     static const size_t slotlistsize = sizeof(slotlist)/sizeof(slotlist[0]);
 
@@ -407,6 +419,8 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
     removeIndividualPart(type);
     mPartslots[type] = group;
     mPartPriorities[type] = priority;
+
+    std::cout <<  mesh <<" " << group << std::endl;
 
     for(size_t i = 0;i < sPartListSize;i++)
     {
