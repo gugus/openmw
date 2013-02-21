@@ -253,6 +253,12 @@ void NpcAnimation::updateParts()
             const ESM::Armor *armor = store->get<ESM::Armor>()->mBase;
             addPartGroup(slotlist[i].slot, prio, armor->mParts.mParts);
         }
+        else if(store->getTypeName() == typeid(ESM::Weapon).name())
+        {
+            prio = ((slotlist[i].numReserveParts+1)<<1) + 1;
+            const ESM::Weapon *weapon = store->get<ESM::Weapon>()->mBase;
+            addOrReplaceIndividualPart(ESM::PRT_Weapon,MWWorld::InventoryStore::Slot_CarriedRight,1,"meshes\\" + weapon->mModel);
+        }
 
         for(int res = 0;res < slotlist[i].numReserveParts;res++)
             reserveIndividualPart(slotlist[i].reserveParts[res], slotlist[i].slot, prio);
