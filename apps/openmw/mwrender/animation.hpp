@@ -23,19 +23,20 @@ protected:
     {
     private:
         Animation *mAnimation;
+		int mLayer;
 
     public:
-        AnimationValue(Animation *anim) : mAnimation(anim)
+        AnimationValue(Animation *anim,int layer) : mAnimation(anim),mLayer(layer)
         { }
 
         virtual Ogre::Real getValue() const
         {
-            return mAnimation->mCurrentTime;
+            return mAnimation->mCurrentTime[mLayer];
         }
 
         virtual void setValue(Ogre::Real value)
         {
-            mAnimation->mCurrentTime = value;
+            mAnimation->mCurrentTime[mLayer] = value;
         }
     };
 
@@ -56,7 +57,8 @@ protected:
     NifOgre::TextKeyMap *mCurrentKeys;
     NifOgre::TextKeyMap::const_iterator mNextKey;
     Ogre::Animation *mCurrentAnim;
-    float mCurrentTime;
+    float mCurrentTime[3];
+
     float mStopTime;
     bool mPlaying;
     bool mLooping;

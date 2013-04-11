@@ -13,6 +13,8 @@
 
 #include "../mwmechanics/character.hpp"
 
+#include <algorithm>
+
 namespace MWRender
 {
 
@@ -40,13 +42,15 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mCurrentControllers(NULL)
     , mCurrentKeys(NULL)
     , mCurrentAnim(NULL)
-    , mCurrentTime(0.0f)
     , mStopTime(0.0f)
     , mPlaying(false)
     , mLooping(false)
     , mAnimVelocity(0.0f)
     , mAnimSpeedMult(1.0f)
 {
+	mCurrentTime[0] = 0;
+	mCurrentTime[1] = 0;
+	mCurrentTime[2] = 0;
 }
 
 Animation::~Animation()
@@ -80,7 +84,9 @@ void Animation::setAnimationSources(const std::vector<std::string> &names)
         destroyObjectList(sceneMgr, mAnimationSources[i]);
     mAnimationSources.clear();
 
-    Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > ctrlval(OGRE_NEW AnimationValue(this));
+    Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > ctrlvalUpper(OGRE_NEW AnimationValue(this,0));
+	Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > ctrlvalLower(OGRE_NEW AnimationValue(this,1));
+	Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > ctrlvalArm(OGRE_NEW AnimationValue(this,2));
     Ogre::SkeletonInstance *skelinst = mObjectList.mSkelBase->getSkeleton();
     std::vector<std::string>::const_iterator nameiter;
     for(nameiter = names.begin();nameiter != names.end();nameiter++)
@@ -105,12 +111,30 @@ void Animation::setAnimationSources(const std::vector<std::string> &names)
 
             Ogre::Bone *bone = skelinst->getBone(trgtname);
             dstval->setNode(bone);
+
+            if(objects.mControllers[i].getSource().isNull())
+			{
+				char const *iupper[] = {"Spine1", "Spine2", "Neck", "Head", "R Clavicle", "R UpperArm", "R Forearm", "R Hand", "R Finger", "Weapon Bone"};
+				std::list<std::string> upper(iupper, iupper + sizeof(iupper) / sizeof(*iupper));
+				char const *ilower[] = {"Pelvis", "Spine", "L Thigh", "L Calf", "L Foot", "L Toe0", "R Thigh", "R Calf", "R Foot", "R Toe0", "MRT", "Tail"};
+				std::list<std::string> lower(ilower, ilower + sizeof(ilower) / sizeof(*ilower));
+				char const *iarm[] = {"L Clavicle", "L UpperArm", "L Forearm", "L Hand", "L Finger", "Shield Bone"};
+				std::list<std::string> arm(iarm, iarm + sizeof(iarm) / sizeof(*iarm));
+
+				std::string boneName = bone->getName();
+				if(std::find(upper.begin(),upper.end(),boneName) != upper.end())
+					objects.mControllers[i].setSource(ctrlvalUpper);
+				if(std::find(lower.begin(),lower.end(),boneName) != lower.end())
+					objects.mControllers[i].setSource(ctrlvalLower);
+				if(std::find(arm.begin(),arm.end(),boneName) != arm.end())
+					objects.mControllers[i].setSource(ctrlvalArm);
+			}
         }
 
         for(size_t i = 0;i < objects.mControllers.size();i++)
         {
             if(objects.mControllers[i].getSource().isNull())
-                objects.mControllers[i].setSource(ctrlval);
+                objects.mControllers[i].setSource(ctrlvalLower);
         }
 
         Ogre::Entity *ent = objects.mSkelBase;
@@ -170,12 +194,12 @@ void Animation::createObjectList(Ogre::SceneNode *node, const std::string &model
             boneiter.getNext()->setManuallyControlled(true);
     }
 
-    Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > ctrlval(OGRE_NEW AnimationValue(this));
+    /*Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > ctrlval(OGRE_NEW AnimationValue(this));
     for(size_t i = 0;i < mObjectList.mControllers.size();i++)
     {
         if(mObjectList.mControllers[i].getSource().isNull())
             mObjectList.mControllers[i].setSource(ctrlval);
-    }
+    }*/
     mCurrentControllers = &mObjectList.mControllers;
 }
 
@@ -317,7 +341,7 @@ Ogre::Vector3 Animation::updatePosition()
 {
     Ogre::Vector3 posdiff;
 
-    Ogre::TransformKeyFrame kf(0, mCurrentTime);
+	Ogre::TransformKeyFrame kf(0, mCurrentTime[0]);
     Ogre::Animation::NodeTrackIterator trackiter = mCurrentAnim->getNodeTrackIterator();
     while(trackiter.hasMoreElements())
     {
