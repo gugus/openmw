@@ -149,7 +149,7 @@ namespace MWRender
         if (!mSelectionBuffer)
             mSelectionBuffer = new OEngine::Render::SelectionBuffer(mCamera, 512, 1024, 0);
 
-        mAnimation->play("inventoryhandtohand", "start", "stop", false);
+        mAnimation->play("inventoryhandtohand", "start", "stop", false, 1);
     }
 
     // --------------------------------------------------------------------------------------------------
@@ -183,7 +183,7 @@ namespace MWRender
 
     void RaceSelectionPreview::onSetup ()
     {
-        mAnimation->play("idle", "start", "stop", false);
+        mAnimation->play("idle", "start", "stop", false, 1);
 
         updateCamera();
     }

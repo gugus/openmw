@@ -47,21 +47,22 @@ protected:
     NifOgre::ObjectList mObjectList;
     std::map<std::string,NifOgre::TextKeyMap> mTextKeys;
     Ogre::Node *mAccumRoot;
+	int mAccumRootLayer;
     Ogre::Bone *mNonAccumRoot;
     Ogre::Vector3 mAccumulate;
     Ogre::Vector3 mLastPosition;
 
     std::vector<NifOgre::ObjectList> mAnimationSources;
 
-    std::vector<Ogre::Controller<Ogre::Real> > *mCurrentControllers;
-    NifOgre::TextKeyMap *mCurrentKeys;
-    NifOgre::TextKeyMap::const_iterator mNextKey;
-    Ogre::Animation *mCurrentAnim;
+    std::vector<Ogre::Controller<Ogre::Real> > *mCurrentControllers[3];
+    NifOgre::TextKeyMap *mCurrentKeys[3];
+    NifOgre::TextKeyMap::const_iterator mNextKey[3];
+    Ogre::Animation *mCurrentAnim[3];
     float mCurrentTime[3];
 
-    float mStopTime;
-    bool mPlaying;
-    bool mLooping;
+    float mStopTime[3];
+    bool mPlaying[3];
+    bool mLooping[3];
 
     float mAnimVelocity;
     float mAnimSpeedMult;
@@ -80,9 +81,9 @@ protected:
      * moving anything, and set the end time to the specified stop marker. If
      * the marker is not found, it resets to the beginning or end respectively.
      */
-    void reset(const std::string &start, const std::string &stop);
+    void reset(const std::string &start, const std::string &stop,int layer);
 
-    bool handleEvent(float time, const std::string &evt);
+    bool handleEvent(float time, const std::string &evt, int layer);
 
     /* Specifies a list of skeleton names to use as animation sources. */
     void setAnimationSources(const std::vector<std::string> &names);
@@ -114,9 +115,9 @@ public:
 
     void setSpeed(float speed);
 
-    void setLooping(bool loop);
+    void setLooping(bool loop,int layer);
 
-    void play(const std::string &groupname, const std::string &start, const std::string &stop, bool loop);
+    void play(const std::string &groupname, const std::string &start, const std::string &stop, bool loop, int layer);
     virtual Ogre::Vector3 runAnimation(float timepassed);
 
     Ogre::Node *getNode(const std::string &name);

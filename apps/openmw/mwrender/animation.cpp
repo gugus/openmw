@@ -36,21 +36,34 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mController(NULL)
     , mInsert(NULL)
     , mAccumRoot(NULL)
+	, mAccumRootLayer(1)
     , mNonAccumRoot(NULL)
     , mAccumulate(Ogre::Vector3::ZERO)
     , mLastPosition(0.0f)
-    , mCurrentControllers(NULL)
-    , mCurrentKeys(NULL)
-    , mCurrentAnim(NULL)
-    , mStopTime(0.0f)
-    , mPlaying(false)
-    , mLooping(false)
     , mAnimVelocity(0.0f)
     , mAnimSpeedMult(1.0f)
 {
+	mCurrentControllers[0] = NULL;
+	mCurrentControllers[1] = NULL;
+	mCurrentControllers[2] = NULL;
+	mCurrentAnim[0] = NULL;
+	mCurrentAnim[1] = NULL;
+	mCurrentAnim[2] = NULL;
+	mCurrentKeys[0] = NULL;
+	mCurrentKeys[1] = NULL;
+	mCurrentKeys[2] = NULL;
 	mCurrentTime[0] = 0;
 	mCurrentTime[1] = 0;
 	mCurrentTime[2] = 0;
+	mStopTime[0] = 0;
+	mStopTime[1] = 0;
+	mStopTime[2] = 0;
+	mPlaying[0] = false;
+	mPlaying[1] = false;
+	mPlaying[2] = false;
+	mLooping[0] = false;
+	mLooping[1] = false;
+	mLooping[2] = false;
 }
 
 Animation::~Animation()
@@ -73,13 +86,17 @@ void Animation::setAnimationSources(const std::vector<std::string> &names)
         return;
     Ogre::SceneManager *sceneMgr = mInsert->getCreator();
 
-    mCurrentControllers = &mObjectList.mControllers;
-    mCurrentAnim = NULL;
-    mCurrentKeys = NULL;
+	for(int i=0;i<3;i++)
+	{
+		mCurrentControllers[i] = &mObjectList.mControllers;
+		mCurrentAnim[i] = NULL;
+		mCurrentKeys[i] = NULL;
+	}
     mAnimVelocity = 0.0f;
     mAccumRoot = NULL;
     mNonAccumRoot = NULL;
     mTextKeys.clear();
+
     for(size_t i = 0;i < mAnimationSources.size();i++)
         destroyObjectList(sceneMgr, mAnimationSources[i]);
     mAnimationSources.clear();
@@ -199,8 +216,8 @@ void Animation::createObjectList(Ogre::SceneNode *node, const std::string &model
     {
         if(mObjectList.mControllers[i].getSource().isNull())
             mObjectList.mControllers[i].setSource(ctrlval);
-    }*/
-    mCurrentControllers = &mObjectList.mControllers;
+    }
+    mCurrentControllers = &mObjectList.mControllers;*/
 }
 
 
@@ -245,9 +262,9 @@ void Animation::setSpeed(float speed)
         mAnimSpeedMult = speed / mAnimVelocity;
 }
 
-void Animation::setLooping(bool loop)
+void Animation::setLooping(bool loop,int layer)
 {
-    mLooping = loop;
+    mLooping[layer] = loop;
 }
 
 void Animation::updatePtr(const MWWorld::Ptr &ptr)
@@ -260,7 +277,7 @@ void Animation::calcAnimVelocity()
 {
     const Ogre::NodeAnimationTrack *track = 0;
 
-    Ogre::Animation::NodeTrackIterator trackiter = mCurrentAnim->getNodeTrackIterator();
+    Ogre::Animation::NodeTrackIterator trackiter = mCurrentAnim[mAccumRootLayer]->getNodeTrackIterator();
     while(!track && trackiter.hasMoreElements())
     {
         const Ogre::NodeAnimationTrack *cur = trackiter.getNext();
@@ -271,9 +288,9 @@ void Animation::calcAnimVelocity()
     if(track && track->getNumKeyFrames() > 1)
     {
         float loopstarttime = 0.0f;
-        float loopstoptime = mCurrentAnim->getLength();
-        NifOgre::TextKeyMap::const_iterator keyiter = mCurrentKeys->begin();
-        while(keyiter != mCurrentKeys->end())
+        float loopstoptime = mCurrentAnim[mAccumRootLayer]->getLength();
+		NifOgre::TextKeyMap::const_iterator keyiter = mCurrentKeys[mAccumRootLayer]->begin();
+        while(keyiter != mCurrentKeys[mAccumRootLayer]->end())
         {
             if(keyiter->second == "loop start")
                 loopstarttime = keyiter->first;
@@ -290,8 +307,8 @@ void Animation::calcAnimVelocity()
             Ogre::TransformKeyFrame startkf(0, loopstarttime);
             Ogre::TransformKeyFrame endkf(0, loopstoptime);
 
-            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(loopstarttime), &startkf);
-            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(loopstoptime), &endkf);
+            track->getInterpolatedKeyFrame(mCurrentAnim[mAccumRootLayer]->_getTimeIndex(loopstarttime), &startkf);
+            track->getInterpolatedKeyFrame(mCurrentAnim[mAccumRootLayer]->_getTimeIndex(loopstoptime), &endkf);
 
             mAnimVelocity = startkf.getTranslate().distance(endkf.getTranslate()) /
                             (loopstoptime-loopstarttime);
@@ -342,13 +359,13 @@ Ogre::Vector3 Animation::updatePosition()
     Ogre::Vector3 posdiff;
 
 	Ogre::TransformKeyFrame kf(0, mCurrentTime[0]);
-    Ogre::Animation::NodeTrackIterator trackiter = mCurrentAnim->getNodeTrackIterator();
+    Ogre::Animation::NodeTrackIterator trackiter = mCurrentAnim[mAccumRootLayer]->getNodeTrackIterator();
     while(trackiter.hasMoreElements())
     {
         const Ogre::NodeAnimationTrack *track = trackiter.getNext();
         if(track->getAssociatedNode()->getName() == mNonAccumRoot->getName())
         {
-            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(mCurrentTime), &kf);
+            track->getInterpolatedKeyFrame(mCurrentAnim[mAccumRootLayer]->_getTimeIndex(mCurrentTime[mAccumRootLayer]), &kf);
             break;
         }
     }
@@ -363,43 +380,43 @@ Ogre::Vector3 Animation::updatePosition()
     return posdiff;
 }
 
-void Animation::reset(const std::string &start, const std::string &stop)
+void Animation::reset(const std::string &start, const std::string &stop,int layer)
 {
-    mNextKey = mCurrentKeys->begin();
+    mNextKey[layer] = mCurrentKeys[layer]->begin();
 
-    while(mNextKey != mCurrentKeys->end() && mNextKey->second != start)
-        mNextKey++;
-    if(mNextKey != mCurrentKeys->end())
-        mCurrentTime = mNextKey->first;
+    while(mNextKey[layer] != mCurrentKeys[layer]->end() && mNextKey[layer]->second != start)
+        mNextKey[layer]++;
+    if(mNextKey[layer] != mCurrentKeys[layer]->end())
+        mCurrentTime[layer] = mNextKey[layer]->first;
     else
     {
-        mNextKey = mCurrentKeys->begin();
-        while(mNextKey != mCurrentKeys->end() && mNextKey->second != "start")
-            mNextKey++;
-        if(mNextKey != mCurrentKeys->end())
-            mCurrentTime = mNextKey->first;
+        mNextKey[layer] = mCurrentKeys[layer]->begin();
+        while(mNextKey[layer] != mCurrentKeys[layer]->end() && mNextKey[layer]->second != "start")
+            mNextKey[layer]++;
+        if(mNextKey[layer] != mCurrentKeys[layer]->end())
+            mCurrentTime[layer] = mNextKey[layer]->first;
         else
         {
-            mNextKey = mCurrentKeys->begin();
-            mCurrentTime = 0.0f;
+            mNextKey[layer] = mCurrentKeys[layer]->begin();
+            mCurrentTime[layer] = 0.0f;
         }
     }
 
     if(stop.length() > 0)
     {
-        NifOgre::TextKeyMap::const_iterator stopKey = mNextKey;
-        while(stopKey != mCurrentKeys->end() && stopKey->second != stop)
+        NifOgre::TextKeyMap::const_iterator stopKey = mNextKey[layer];
+        while(stopKey != mCurrentKeys[layer]->end() && stopKey->second != stop)
             stopKey++;
-        if(stopKey != mCurrentKeys->end())
-            mStopTime = stopKey->first;
+        if(stopKey != mCurrentKeys[layer]->end())
+            mStopTime[layer] = stopKey->first;
         else
-            mStopTime = mCurrentAnim->getLength();
+            mStopTime[layer] = mCurrentAnim[layer]->getLength();
     }
 
     if(mNonAccumRoot)
     {
         const Ogre::NodeAnimationTrack *track = 0;
-        Ogre::Animation::NodeTrackIterator trackiter = mCurrentAnim->getNodeTrackIterator();
+        Ogre::Animation::NodeTrackIterator trackiter = mCurrentAnim[layer]->getNodeTrackIterator();
         while(!track && trackiter.hasMoreElements())
         {
             const Ogre::NodeAnimationTrack *cur = trackiter.getNext();
@@ -409,15 +426,15 @@ void Animation::reset(const std::string &start, const std::string &stop)
 
         if(track)
         {
-            Ogre::TransformKeyFrame kf(0, mCurrentTime);
-            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(mCurrentTime), &kf);
+            Ogre::TransformKeyFrame kf(0, mCurrentTime[layer]);
+            track->getInterpolatedKeyFrame(mCurrentAnim[layer]->_getTimeIndex(mCurrentTime[layer]), &kf);
             mLastPosition = kf.getTranslate() * mAccumulate;
         }
     }
 }
 
 
-bool Animation::handleEvent(float time, const std::string &evt)
+bool Animation::handleEvent(float time, const std::string &evt, int layer)
 {
     if(evt == "start" || evt == "loop start")
     {
@@ -440,20 +457,20 @@ bool Animation::handleEvent(float time, const std::string &evt)
 
     if(evt == "loop stop")
     {
-        if(mLooping)
+        if(mLooping[layer])
         {
-            reset("loop start", "");
-            if(mCurrentTime >= time)
+            reset("loop start", "",layer);
+            if(mCurrentTime[layer] >= time)
                 return false;
         }
         return true;
     }
     if(evt == "stop")
     {
-        if(mLooping)
+        if(mLooping[layer])
         {
-            reset("loop start", "");
-            if(mCurrentTime >= time)
+            reset("loop start", "",layer);
+            if(mCurrentTime[layer] >= time)
                 return false;
             return true;
         }
@@ -465,7 +482,7 @@ bool Animation::handleEvent(float time, const std::string &evt)
 }
 
 
-void Animation::play(const std::string &groupname, const std::string &start, const std::string &stop, bool loop)
+void Animation::play(const std::string &groupname, const std::string &start, const std::string &stop, bool loop, int layer)
 {
     try {
         bool found = false;
@@ -474,9 +491,9 @@ void Animation::play(const std::string &groupname, const std::string &start, con
         {
             if(iter->mSkelBase->hasAnimationState(groupname))
             {
-                mCurrentAnim = iter->mSkelBase->getSkeleton()->getAnimation(groupname);
-                mCurrentKeys = &mTextKeys[groupname];
-                mCurrentControllers = &iter->mControllers;
+                mCurrentAnim[layer] = iter->mSkelBase->getSkeleton()->getAnimation(groupname);
+                mCurrentKeys[layer] = &mTextKeys[groupname];
+                mCurrentControllers[layer] = &iter->mControllers;
                 mAnimVelocity = 0.0f;
 
                 if(mNonAccumRoot)
@@ -489,9 +506,9 @@ void Animation::play(const std::string &groupname, const std::string &start, con
         if(!found)
             throw std::runtime_error("Failed to find animation "+groupname);
 
-        reset(start, stop);
-        setLooping(loop);
-        mPlaying = true;
+        reset(start, stop, layer);
+        setLooping(loop, layer);
+        mPlaying[layer] = true;
     }
     catch(std::exception &e) {
         std::cerr<< e.what() <<std::endl;
@@ -503,34 +520,37 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
     Ogre::Vector3 movement(0.0f);
 
     timepassed *= mAnimSpeedMult;
-    while(mCurrentAnim && mPlaying)
-    {
-        float targetTime = mCurrentTime + timepassed;
-        if(mNextKey == mCurrentKeys->end() || mNextKey->first > targetTime)
-        {
-            mCurrentTime = std::min(mStopTime, targetTime);
-            if(mNonAccumRoot)
-                movement += updatePosition();
-            mPlaying = (mLooping || mStopTime > mCurrentTime);
-            timepassed = targetTime - mCurrentTime;
-            break;
-        }
+	for(int i=0;i<3;i++)
+	{
+		while(mCurrentAnim && mPlaying[i])
+		{
+			float targetTime = mCurrentTime[i] + timepassed;
+			if(mNextKey[i] == mCurrentKeys[i]->end() || mNextKey[i]->first > targetTime)
+			{
+				mCurrentTime[i] = std::min(mStopTime[i], targetTime);
+				if(mNonAccumRoot)
+					movement += updatePosition();
+				mPlaying[i] = (mLooping || mStopTime > mCurrentTime);
+				timepassed = targetTime - mCurrentTime[i];
+				break;
+			}
 
-        float time = mNextKey->first;
-        const std::string &evt = mNextKey->second;
-        mNextKey++;
+			float time = mNextKey[i]->first;
+			const std::string &evt = mNextKey[i]->second;
+			mNextKey[i]++;
 
-        mCurrentTime = time;
-        if(mNonAccumRoot)
-            movement += updatePosition();
-        mPlaying = (mLooping || mStopTime > mCurrentTime);
-        timepassed = targetTime - mCurrentTime;
+			mCurrentTime[i] = time;
+			if(mNonAccumRoot)
+				movement += updatePosition();
+			mPlaying[i] = (mLooping || mStopTime > mCurrentTime);
+			timepassed = targetTime - mCurrentTime[i];
 
-        if(!handleEvent(time, evt))
-            break;
-    }
-    for(size_t i = 0;i < mCurrentControllers->size();i++)
-        (*mCurrentControllers)[i].update();
+			if(!handleEvent(time, evt,i))
+				break;
+		}
+		for(size_t j = 0;j < mCurrentControllers[i]->size();j++)
+			(*mCurrentControllers[i])[j].update();
+	}
 
     if(mObjectList.mSkelBase)
     {
