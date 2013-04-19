@@ -82,6 +82,7 @@ Animation::~Animation()
 
 void Animation::setAnimationSources(const std::vector<std::string> &names)
 {
+	std::cout << "set animation source...";
     if(!mObjectList.mSkelBase)
         return;
     Ogre::SceneManager *sceneMgr = mInsert->getCreator();
@@ -183,10 +184,12 @@ void Animation::setAnimationSources(const std::vector<std::string> &names)
             break;
         }
     }
+	std::cout << "done \n";
 }
 
 void Animation::createObjectList(Ogre::SceneNode *node, const std::string &model)
 {
+	std::cout << "createobjectlist...";
     mInsert = node->createChildSceneNode();
     assert(mInsert);
 
@@ -211,13 +214,16 @@ void Animation::createObjectList(Ogre::SceneNode *node, const std::string &model
             boneiter.getNext()->setManuallyControlled(true);
     }
 
-    /*Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > ctrlval(OGRE_NEW AnimationValue(this));
+    Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > ctrlval(OGRE_NEW AnimationValue(this,1));
     for(size_t i = 0;i < mObjectList.mControllers.size();i++)
     {
         if(mObjectList.mControllers[i].getSource().isNull())
             mObjectList.mControllers[i].setSource(ctrlval);
     }
-    mCurrentControllers = &mObjectList.mControllers;*/
+    mCurrentControllers[0] = &mObjectList.mControllers;
+	mCurrentControllers[1] = &mObjectList.mControllers;
+	mCurrentControllers[2] = &mObjectList.mControllers;
+	std::cout << "done \n";
 }
 
 
@@ -484,6 +490,7 @@ bool Animation::handleEvent(float time, const std::string &evt, int layer)
 
 void Animation::play(const std::string &groupname, const std::string &start, const std::string &stop, bool loop, int layer)
 {
+	std::cout << "start playing...";
     try {
         bool found = false;
         /* Look in reverse; last-inserted source has priority. */
@@ -513,17 +520,21 @@ void Animation::play(const std::string &groupname, const std::string &start, con
     catch(std::exception &e) {
         std::cerr<< e.what() <<std::endl;
     }
+	std::cout << "done";
 }
 
 Ogre::Vector3 Animation::runAnimation(float timepassed)
 {
+	std::cout << "run animation...";
     Ogre::Vector3 movement(0.0f);
 
     timepassed *= mAnimSpeedMult;
 	for(int i=0;i<3;i++)
 	{
-		while(mCurrentAnim && mPlaying[i])
+		std::cout << i;
+		while(mCurrentAnim[i] && mPlaying[i])
 		{
+			std::cout << "a";
 			float targetTime = mCurrentTime[i] + timepassed;
 			if(mNextKey[i] == mCurrentKeys[i]->end() || mNextKey[i]->first > targetTime)
 			{
@@ -534,7 +545,7 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
 				timepassed = targetTime - mCurrentTime[i];
 				break;
 			}
-
+			std::cout << "b";
 			float time = mNextKey[i]->first;
 			const std::string &evt = mNextKey[i]->second;
 			mNextKey[i]++;
@@ -544,14 +555,15 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
 				movement += updatePosition();
 			mPlaying[i] = (mLooping || mStopTime > mCurrentTime);
 			timepassed = targetTime - mCurrentTime[i];
-
+			std::cout << "c";
 			if(!handleEvent(time, evt,i))
 				break;
 		}
+		std::cout << "d";
 		for(size_t j = 0;j < mCurrentControllers[i]->size();j++)
 			(*mCurrentControllers[i])[j].update();
 	}
-
+	std::cout << "e";
     if(mObjectList.mSkelBase)
     {
         // HACK: Dirty the animation state set so that Ogre will apply the
@@ -559,6 +571,7 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
         mObjectList.mSkelBase->getAllAnimationStates()->_notifyDirty();
     }
 
+	std::cout << "done \n";
     return movement;
 }
 
