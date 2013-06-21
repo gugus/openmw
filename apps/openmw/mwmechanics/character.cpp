@@ -465,6 +465,24 @@ void CharacterController::update(float duration, Movement &movement)
                 }
             }
 
+            if(cls.getCreatureStats(mPtr).getAttackingOrSpell())
+            {
+                std::cout << "attacking!";
+                if(mUpperBodyState == UpperCharState_WeapEquiped)
+                {
+                    std::string weapgroup;
+                    getWeaponGroup(mWeaponType, weapgroup);
+                    mAnimation->play(weapgroup, Priority_Weapon,
+                            MWRender::Animation::Group_UpperBody, true,
+                            "chop start", "chop large follow stop", 0.0f, 0);
+                    mUpperBodyState = UpperCharState_ChopReadyingMouseHold;
+                }
+            }
+            else if(mUpperBodyState == UpperCharState_ChopReadyingMouseHold)
+            {
+                mUpperBodyState = UpperCharState_ChopReadying;
+            }
+
             MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
             if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name())
             {
@@ -585,6 +603,7 @@ void CharacterController::handleTextKey(const std::string &groupname, const NifO
 
     if(evt.compare(off, len, "equip stop") == 0) mUpperBodyState = UpperCharState_WeapEquiped;
     if(evt.compare(off, len, "unequip stop") == 0) mUpperBodyState = UpperCharState_Nothing;
+    if(evt.compare(off, len, "chop large follow stop") == 0) mUpperBodyState = UpperCharState_WeapEquiped;
 }
 
 }

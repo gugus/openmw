@@ -484,7 +484,6 @@ namespace MWInput
     bool InputManager::mousePressed( const OIS::MouseEvent &arg, OIS::MouseButtonID id )
     {
         mInputCtrl->mousePressed (arg, id);
-
         MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, MyGUI::MouseButton::Enum(id));
 
         if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
@@ -495,10 +494,7 @@ namespace MWInput
                 MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
             }
         }
-        else
-        {
-            MWWorld::Class::get(mPlayer.getPlayer()).getCreatureStats(mPlayer.getPlayer()).setAttackingOrSpell(true);
-        }
+        MWWorld::Class::get(mPlayer.getPlayer()).getCreatureStats(mPlayer.getPlayer()).setAttackingOrSpell(true);
 
         return true;
     }
