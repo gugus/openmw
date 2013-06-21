@@ -175,6 +175,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     : mPtr(ptr)
     , mAnimation(anim)
     , mCharState(state)
+    , mUpperBodyState(UpperCharState_Nothing)
     , mWeaponType(WeapType_None)
     , mSkipAnim(false)
     , mSecondsOfRunning(0)

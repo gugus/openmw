@@ -77,6 +77,20 @@ enum CharacterState {
     CharState_Death5
 };
 
+enum UpperBodyCharacterState {
+    UpperCharState_Nothing,
+    UpperCharState_EquipingWeap,
+    UpperCharState_UnEquipingWeap,
+    UpperCharState_Slashing,
+    UpperCharState_ChopReadying,
+    UpperCharState_ChopReadyingMouseHold,  //when you keep your mouse clicked to ready your weapon
+    UpperCharState_ChopReadyWaiting, //when your weapon is ready and you keep mouse hold
+    UpperCharState_Choping,
+    UpperCharState_Thrusting,
+    UpperCharState_EquipingSpell,
+    UpperCharState_UnEquipingSpell
+};
+
 enum WeaponType {
     WeapType_None,
 
@@ -101,6 +115,7 @@ class CharacterController
     AnimationQueue mAnimQueue;
 
     CharacterState mCharState;
+    UpperBodyCharacterState mUpperBodyState;
     WeaponType mWeaponType;
     bool mSkipAnim;
 

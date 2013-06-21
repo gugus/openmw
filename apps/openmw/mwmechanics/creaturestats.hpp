@@ -34,6 +34,7 @@ namespace MWMechanics
         bool mAlarmed;
         bool mAttacked;
         bool mHostile;
+        bool mAttackingOrSpell;//for the player, this is true if the left mouse button is pressed, false if not.
 
     public:
         CreatureStats();
@@ -53,6 +54,8 @@ namespace MWMechanics
         const ActiveSpells & getActiveSpells() const;
 
         const MagicEffects & getMagicEffects() const;
+
+        const bool & getAttackingOrSpell() const;
 
         int getLevel() const;
 
@@ -82,6 +85,8 @@ namespace MWMechanics
         void setActiveSpells(const ActiveSpells &active);
 
         void setMagicEffects(const MagicEffects &effects);
+
+        void setAttackingOrSpell(const bool &attackingOrSpell);
 
         void setLevel(int level);
 
