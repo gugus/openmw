@@ -4,7 +4,7 @@
 #include <OgreController.h>
 #include <OgreVector3.h>
 
-#include <components/nifogre/ogrenifloader.hpp>
+#include "animationListener.hpp"
 
 #include "../mwworld/ptr.hpp"
 
@@ -96,6 +96,8 @@ protected:
 
     float mAnimVelocity;
     float mAnimSpeedMult;
+
+    std::list<AnimationListener*> mListeners;
 
     /* Sets the appropriate animations on the bone groups based on priority.
      */
@@ -200,6 +202,9 @@ public:
     virtual void showWeapons(bool showWeapon);
 
     Ogre::Node *getNode(const std::string &name);
+
+    void addListener(AnimationListener* listener);
+    void removeListener(AnimationListener* listener);
 };
 
 }

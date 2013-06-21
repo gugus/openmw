@@ -4,6 +4,7 @@
 #include <OgreVector3.h>
 
 #include "../mwworld/ptr.hpp"
+#include "../mwrender/animationListener.hpp"
 
 namespace MWRender
 {
@@ -81,6 +82,7 @@ enum UpperBodyCharacterState {
     UpperCharState_Nothing,
     UpperCharState_EquipingWeap,
     UpperCharState_UnEquipingWeap,
+    UpperCharState_WeapEquiped,
     UpperCharState_Slashing,
     UpperCharState_ChopReadying,
     UpperCharState_ChopReadyingMouseHold,  //when you keep your mouse clicked to ready your weapon
@@ -106,7 +108,7 @@ enum WeaponType {
     WeapType_Spell
 };
 
-class CharacterController
+class CharacterController:public MWRender::AnimationListener
 {
     MWWorld::Ptr mPtr;
     MWRender::Animation *mAnimation;
@@ -132,6 +134,7 @@ class CharacterController
 
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state);
+    CharacterController(const CharacterController& ctrl);
     virtual ~CharacterController();
 
     void updatePtr(const MWWorld::Ptr &ptr);
@@ -147,6 +150,8 @@ public:
     { return mCharState; }
 
     void forceStateUpdate();
+
+    virtual void handleTextKey(const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key);
 };
 
 }

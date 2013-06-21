@@ -437,6 +437,11 @@ bool Animation::handleTextKey(AnimState &state, const std::string &groupname, co
     float time = key->first;
     const std::string &evt = key->second;
 
+    for(std::list<AnimationListener*>::iterator it = mListeners.begin();it!=mListeners.end();it++)
+    {
+        (*it)->handleTextKey(groupname,key);
+    }
+
     if(evt.compare(0, 7, "sound: ") == 0)
     {
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
@@ -734,6 +739,20 @@ bool Animation::isPriorityActive(int priority) const
         if (it->second.mPriority == priority)
             return true;
     return false;
+}
+
+void Animation::addListener(AnimationListener* listener)
+{
+    mListeners.push_back(listener);
+}
+
+void Animation::removeListener(AnimationListener* listener)
+{
+    for(std::list<AnimationListener*>::iterator it = mListeners.begin();it!=mListeners.end();)
+    {
+        if(*it == listener) it = mListeners.erase(it);
+        else it++;
+    }
 }
 
 }

@@ -184,6 +184,8 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     if(!mAnimation)
         return;
 
+
+    mAnimation->addListener(this);
     if(MWWorld::Class::get(mPtr).isActor())
     {
         /* Accumulate along X/Y only for now, until we can figure out how we should
@@ -204,8 +206,26 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
                      "start", "stop", 1.0f, loops ? (~(size_t)0) : 0);
 }
 
+CharacterController::CharacterController(const CharacterController& ctrl)
+{
+    mPtr = ctrl.mPtr;
+    mAnimation = ctrl.mAnimation;
+
+    mAnimQueue = ctrl.mAnimQueue;
+
+    mCharState = ctrl.mCharState;
+    mUpperBodyState = ctrl.mUpperBodyState;
+    mWeaponType = ctrl.mWeaponType;
+    mSkipAnim = ctrl.mSkipAnim;
+
+    mSecondsOfSwimming = ctrl.mSecondsOfSwimming;
+    mSecondsOfRunning = ctrl.mSecondsOfRunning;    
+    mAnimation->addListener(this);
+}
+
 CharacterController::~CharacterController()
 {
+    mAnimation->removeListener(this);
 }
 
 
@@ -417,6 +437,7 @@ void CharacterController::update(float duration, Movement &movement)
                     mAnimation->play(weapgroup, Priority_Weapon,
                                      MWRender::Animation::Group_UpperBody, true,
                                      "unequip start", "unequip stop", 0.0f, 0);
+                    mUpperBodyState = UpperCharState_UnEquipingWeap;
                 }
                 else
                 {
@@ -425,6 +446,7 @@ void CharacterController::update(float duration, Movement &movement)
                     mAnimation->play(weapgroup, Priority_Weapon,
                                      MWRender::Animation::Group_UpperBody, true,
                                      "equip start", "equip stop", 0.0f, 0);
+                    mUpperBodyState = UpperCharState_EquipingWeap;
                 }
 
                 mWeaponType = weaptype;
@@ -551,6 +573,18 @@ void CharacterController::forceStateUpdate()
     getCurrentGroup(group, prio, loops);
     mAnimation->play(group, prio, MWRender::Animation::Group_All, false,
                      "start", "stop", 0.0f, loops ? (~(size_t)0) : 0);
+}
+
+void CharacterController::handleTextKey(const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key)
+{
+    //std::cout << groupname;
+    float time = key->first;
+    const std::string &evt = key->second;
+    size_t off = groupname.size()+2;
+    size_t len = evt.size() - off;
+
+    if(evt.compare(off, len, "equip stop") == 0) mUpperBodyState = UpperCharState_WeapEquiped;
+    if(evt.compare(off, len, "unequip stop") == 0) mUpperBodyState = UpperCharState_Nothing;
 }
 
 }
